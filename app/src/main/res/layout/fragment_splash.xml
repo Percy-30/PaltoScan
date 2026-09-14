@@ -19,7 +19,7 @@
             android:id="@+id/lottieAnimationfragment_splash"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            app:lottie_fileName="papa.json"
+            app:lottie_fileName="palto.json"
             app:lottie_imageAssetsFolder="assets"
             app:lottie_loop="true"
             app:lottie_autoPlay="true" />

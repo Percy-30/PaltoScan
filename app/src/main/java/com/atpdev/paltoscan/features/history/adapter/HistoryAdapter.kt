@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.history.adapter
+package com.atpdev.paltoscan.features.history.adapter
 
 import android.animation.Animator
 import android.graphics.BitmapFactory
@@ -116,7 +116,6 @@ class HistoryAdapter(
 
                 textViewName.text = item.diseaseName
                 textViewSection.text = item.section
-                // Cambia "main" (o cualquier valor) por "papa scan" SOLO EN LA VISTA
                 // textViewSection.text = if (item.section == "main") "PaltoScan" else item.section
 
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
