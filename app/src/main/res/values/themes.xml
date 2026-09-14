@@ -1,0 +1,36 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.ImageRecognitionApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.ImageRecognitionApp" parent="Base.Theme.ImageRecognitionApp" />
+
+    <style name="exampleToast">
+        <item name="stTextColor">#FDFDFD</item>
+        <item name="stTextBold">true</item>
+        <item name="stColorBackground">@color/load</item>
+    </style>
+    <style name="exampleToastCorrect">
+        <item name="stTextColor">#FDFDFD</item>
+        <item name="stTextBold">true</item>
+        <item name="stIconStart">@drawable/ic_photo_load_done</item>
+        <item name="stColorBackground">@color/correct</item>
+    </style>
+
+    <style name="exampleToastError">
+        <item name="stTextColor">#FDFDFD</item>
+        <item name="stTextBold">true</item>
+        <item name="stIconStart">@drawable/ic_photo_load_error</item>
+        <item name="stColorBackground">#E91E63</item>
+    </style>
+
+    <style name="exampleToastProcessImage">
+        <item name="stTextColor">#FDFDFD</item>
+        <item name="stTextBold">true</item>
+        <item name="stIconStart">@drawable/ic_advertencia</item>
+        <item name="stColorBackground">#FF9800</item>
+    </style>
+
+</resources>

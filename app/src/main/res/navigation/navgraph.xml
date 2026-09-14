@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navgraph"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.atpdev.app.ui.splash.SplashFragment"
+        android:label="SplashFragment" >
+        <action
+            android:id="@+id/action_splashFragment_to_recognitionMain"
+            app:destination="@id/recognitionMain" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/recognitionMain"
+        android:name="com.atpdev.paltoscan.features.main.RecognitionMain"
+        android:label="RecognitionMain"
+        tools:layout="@layout/fragment_recognition">
+        <action
+            android:id="@+id/action_recognitionMain_to_recognitionFragment"
+            app:destination="@id/recognitionFragment" />
+        <action
+            android:id="@+id/action_recognitionMain_to_fragmentAlertDialog"
+            app:destination="@id/fragmentAlertDialog" />
+        <action
+            android:id="@+id/action_recognitionMain_to_historyFragment"
+            app:destination="@id/historyFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/recognitionFragment"
+        android:name="com.atpdev.paltoscan.features.recognition.RecognitionFragment"
+        android:label="RecognitionFragment"
+       >
+        <action
+            android:id="@+id/action_recognitionFragment_to_recognitionMain"
+            app:destination="@id/recognitionMain" />
+        <action
+            android:id="@+id/action_recognitionFragment_to_fragmentCamera"
+            app:destination="@id/fragmentCamera" />
+        <action
+            android:id="@+id/action_recognitionFragment_to_fragmentAlertDialog"
+            app:destination="@id/fragmentAlertDialog" />
+        <action
+            android:id="@+id/action_recognitionFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+        <action
+            android:id="@+id/action_recognitionFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentCamera"
+        android:name="com.atpdev.paltoscan.features.camera.FragmentCamera"
+        android:label="FragmentCamera" >
+        <action
+            android:id="@+id/action_fragmentCamera_to_recognitionFragment"
+            app:destination="@id/recognitionFragment" />
+        <action
+            android:id="@+id/action_fragmentCamera_to_fragmentAlertDialog"
+            app:destination="@id/fragmentAlertDialog" />
+    </fragment>
+    <dialog
+        android:id="@+id/fragmentAlertDialog"
+        android:name="com.atpdev.paltoscan.core.ui.FragmentAlertDialog"
+        android:label="fragment_alert_dialog"
+        tools:layout="@layout/fragment_alert_dialog" >
+        <action
+            android:id="@+id/action_fragmentAlertDialog_to_recognitionMain"
+            app:destination="@id/recognitionMain" />
+        <action
+            android:id="@+id/action_fragmentAlertDialog_to_recognitionFragment"
+            app:destination="@id/recognitionFragment" />
+        <action
+            android:id="@+id/action_fragmentAlertDialog_to_fragmentCamera"
+            app:destination="@id/fragmentCamera" />
+        <action
+            android:id="@+id/action_fragmentAlertDialog_to_resultFragment"
+            app:destination="@id/resultFragment" />
+        <action
+            android:id="@+id/action_fragmentAlertDialog_to_diseaseInfoFragment"
+            app:destination="@id/diseaseInfoFragment" />
+        <action
+            android:id="@+id/action_fragmentAlertDialog_to_historyFragment"
+            app:destination="@id/historyFragment" />
+    </dialog>
+    <fragment
+        android:id="@+id/resultFragment"
+        android:name="com.atpdev.paltoscan.features.result.ResultFragment"
+        android:label="fragment_result"
+        tools:layout="@layout/fragment_result" >
+        <action
+            android:id="@+id/action_resultFragment_to_recognitionFragment"
+            app:destination="@id/recognitionFragment" />
+        <action
+            android:id="@+id/action_resultFragment_to_fragmentAlertDialog"
+            app:destination="@id/fragmentAlertDialog" />
+        <action
+            android:id="@+id/action_resultFragment_to_diseaseInfoFragment"
+            app:destination="@id/diseaseInfoFragment" />
+        <action
+            android:id="@+id/action_resultFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/diseaseInfoFragment"
+        android:name="com.atpdev.paltoscan.features.diseaseInfo.DiseaseInfoFragment"
+        android:label="DiseaseInfoFragment" >
+        <action
+            android:id="@+id/action_diseaseInfoFragment_to_fragmentAlertDialog"
+            app:destination="@id/fragmentAlertDialog" />
+        <action
+            android:id="@+id/action_diseaseInfoFragment_to_recognitionFragment"
+            app:destination="@id/recognitionFragment" />
+        <action
+            android:id="@+id/action_diseaseInfoFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="HistoryFragment"
+        android:label="HistoryFragment" >
+        <action
+            android:id="@+id/action_historyFragment_to_fragmentAlertDialog"
+            app:destination="@id/fragmentAlertDialog" />
+        <action
+            android:id="@+id/action_historyFragment_to_recognitionFragment"
+            app:destination="@id/recognitionFragment" />
+        <action
+            android:id="@+id/action_historyFragment_to_fragmentCamera"
+            app:destination="@id/fragmentCamera" />
+
+        <action
+            android:id="@+id/action_historyFragment_to_recognitionMain"
+            app:destination="@id/recognitionMain" />
+        <action
+            android:id="@+id/action_historyFragment_to_diseaseInfoFragment"
+            app:destination="@id/diseaseInfoFragment" />
+    </fragment>
+
+</navigation>

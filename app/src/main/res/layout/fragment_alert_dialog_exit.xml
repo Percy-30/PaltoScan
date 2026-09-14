@@ -1,0 +1,71 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Ícono centrado (opcional) -->
+    <ImageView
+        android:id="@+id/iconHeader"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+         android:layout_marginBottom="8dp"/> <!-- Espacio entre ícono y título -->
+
+    <TextView
+        android:id="@+id/infoTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textAlignment="center"/>
+
+    <TextView
+        android:id="@+id/infoDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNegative"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/green"
+            app:backgroundTint="@null"
+            android:textColor="@color/white"
+            android:layout_marginTop="0dp"
+            app:iconTint="@color/white"
+            app:rippleColor="@color/colorRedBright"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintEnd_toEndOf="@+id/btnPositive"
+            app:layout_constraintHorizontal_bias="0.5"
+            android:text="@string/cancel"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPositive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/colorRedBright"
+            app:backgroundTint="@null"
+            android:textColor="@color/white"
+            android:layout_marginTop="0dp"
+            android:layout_marginStart="5dp"
+            app:iconTint="@color/white"
+            app:rippleColor="@color/green"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/btnNegative"
+            android:textSize="14sp"
+            android:text="@string/exit"/>
+    </LinearLayout>
+</LinearLayout>

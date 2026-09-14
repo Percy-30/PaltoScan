@@ -1,0 +1,46 @@
+﻿<resources>
+    <string name="app_name">PaltoScan</string>
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <!-- TODO: Text String Menu Principal -->
+    <string name="app">Papa Scan</string>
+    <string name="infoTitle">Informacion</string>
+    <string name="infoDescription">Deteccion de la enfermedad de la papa</string>
+    <string name="version_label">Versión %1$s</string>
+    <string name="infoDescriptioneEmail">Desarrollado por ATP Dev\n atp.dev000@gmail.com</string>
+    <string name="infoImgDescription">Icono de informacion</string>
+    <string name="privacy_policy">Ver política de privacidad</string>
+    <string name="btnHecho">Hecho</string>
+
+    <string name="btnDetectPatofoli">Detectar enfermedad</string>
+    <string name="btnHistory">Historial</string>
+    <string name="btnAbout">Acerca de Papa Scan</string>
+    <string name="btnExit">Salir</string>
+    <string name="itemName">Item</string>
+
+    <string name="btnTakePhoto">Tomar Foto</string>
+    <string name="btnSavePhoto">Guardar</string>
+    <string name="btnCancelPhoto">Cancel</string>
+    <string name="btnProcessImage">Procesar Imagen</string>
+
+    <string name="confidence_label">Probabilidad: %1$.2f%%</string>
+    <string name="recognition_title">Reconocimiento</string>
+    <string name="result_image">Resultado</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="showInfo">Ver enfermedad</string>
+    <string name="clear_history">Limpiar Historial</string>
+    <string name="delete_history">Eliminar</string>
+
+    <!-- TODO: Para salir del app -->
+    <string name="exit_app_title">Salir de la aplicación</string>
+    <string name="exit_app_message">¿Estás seguro que deseas salir de la aplicación?</string>
+    <string name="exit">Salir</string>
+    <string name="cancel">Cancelar</string>
+    <string name="user_manual"> Manual de usuario</string>
+    <string name="share_app">Compartir Papa Scan</string>
+    <string name="share_app_title">Papa Scan</string>
+    <string name="share_app_message">🌱 ¡Hola! Te recomiendo Papa Scan, una app que detecta enfermedades en hojas de papa usando inteligencia artificial. Pruébala desde aquí:</string>
+    <string name="choose_app_to_share">Elige una app para compartir Papa Scan</string>
+
+</resources>

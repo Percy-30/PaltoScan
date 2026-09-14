@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Acceso a archivos temporales (como el PDF que copias en cacheDir) -->
+    <cache-path
+        name="shared_pdfs"
+        path="." />
+
+    <!-- Define las rutas de los archivos a los que se puede acceder <external-path -->
+    <files-path
+        name="app_images"
+        path="app_imageDir/" />
+</paths>

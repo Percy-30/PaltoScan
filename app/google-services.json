@@ -1,0 +1,29 @@
+﻿{
+  "project_info": {
+    "project_number": "988580505118",
+    "project_id": "papa-scan",
+    "storage_bucket": "papa-scan.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988580505118:android:d6fb8a23d18147b042b00f",
+        "android_client_info": {
+          "package_name": "com.atpdev.paltoscan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeRM-PsNxV2RKO_InQgZPVjrhfdfecaFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
