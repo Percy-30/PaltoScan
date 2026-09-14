@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.data.remote
+package com.atpdev.paltoscan.data.remote
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.GET

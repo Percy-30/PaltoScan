@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.domain.repository
+package com.atpdev.paltoscan.domain.repository
 
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner

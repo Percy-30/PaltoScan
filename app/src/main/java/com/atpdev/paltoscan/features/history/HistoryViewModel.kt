@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.history
+package com.atpdev.paltoscan.features.history
 
 import androidx.lifecycle.LiveData
 import timber.log.Timber

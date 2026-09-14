@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.history
+package com.atpdev.paltoscan.features.history
 
 import androidx.recyclerview.widget.DiffUtil
 import com.atpdev.paltoscan.features.history.adapter.HistoryItem

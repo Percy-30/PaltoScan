@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.core.common
+package com.atpdev.paltoscan.core.common
 
 import android.content.Context
 import android.view.Menu

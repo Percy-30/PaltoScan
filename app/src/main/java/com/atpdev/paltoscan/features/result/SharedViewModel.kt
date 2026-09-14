@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.result
+package com.atpdev.paltoscan.features.result
 
 import android.graphics.Bitmap
 import timber.log.Timber

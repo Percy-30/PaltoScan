@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.main
+package com.atpdev.paltoscan.features.main
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

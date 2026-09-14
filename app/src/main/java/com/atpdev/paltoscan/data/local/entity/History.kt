@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.data.local.entity
+package com.atpdev.paltoscan.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

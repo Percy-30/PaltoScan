@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.camera
+package com.atpdev.paltoscan.features.camera
 
 import android.graphics.drawable.BitmapDrawable
 import timber.log.Timber

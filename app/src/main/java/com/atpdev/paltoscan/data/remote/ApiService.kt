@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.data.remote
+package com.atpdev.paltoscan.data.remote
 
 import com.atpdev.paltoscan.domain.model.RecognitionResult
 import okhttp3.MultipartBody

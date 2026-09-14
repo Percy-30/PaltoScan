@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.data.repository
+package com.atpdev.paltoscan.data.repository
 
 import android.Manifest
 import timber.log.Timber

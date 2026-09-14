@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.data.local.dao
+package com.atpdev.paltoscan.data.local.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao

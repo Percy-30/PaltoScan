@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.diseaseInfo
+package com.atpdev.paltoscan.features.diseaseInfo
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter

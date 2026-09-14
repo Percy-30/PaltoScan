@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.recognition
+package com.atpdev.paltoscan.features.recognition
 
 import android.app.Application
 import android.graphics.Bitmap

@@ -42,18 +42,26 @@ class TensorFlowHelper
         }
 
         init {
-            // Modelo principal: MobileNetV3Large entrenado para 11 clases de enfermedades del palto
-            var selectedModel = "ml/paltoscan_MobileNetV3Large_Inicial.tflite"
+            // Modelo principal de PaltoScan: MobileNetV3Large o MobileNetV2 entrenado con 11 clases
             var modelFile: ByteBuffer? = null
-            try {
-                modelFile = FileUtil.loadMappedFile(context, selectedModel)
-                Timber.tag("TensorFlowHelper").d("Cargado modelo PaltoScan MobileNetV3Large (11 clases)")
-            } catch (e: Exception) {
-                Timber.tag("TensorFlowHelper").w("No se encontró el modelo principal, usando fallback")
-                selectedModel = "ml/model_mobilenet.tflite"
-                modelFile = FileUtil.loadMappedFile(context, selectedModel)
+            val candidates = listOf(
+                "ml/paltoscan_MobileNetV3Large_Inicial.tflite",
+                "ml/paltoscan_MobileNetV2.tflite",
+                "ml/model_mobilenet.tflite"
+            )
+            for (candidate in candidates) {
+                try {
+                    modelFile = FileUtil.loadMappedFile(context, candidate)
+                    Timber.tag("TensorFlowHelper").d("Cargado modelo: $candidate (11 clases)")
+                    break
+                } catch (e: Exception) {
+                    Timber.tag("TensorFlowHelper").w("No se pudo cargar $candidate, intentando siguiente...")
+                }
             }
-            model = Interpreter(modelFile!!)
+            if (modelFile == null) {
+                throw IllegalStateException("No se pudo cargar ningún modelo TFLite de los assets.")
+            }
+            model = Interpreter(modelFile)
         }
 
         fun getInputShape(): IntArray {

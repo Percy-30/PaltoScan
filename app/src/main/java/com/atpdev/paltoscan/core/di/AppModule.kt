@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.core.di
+package com.atpdev.paltoscan.core.di
 
 import android.content.Context
 import androidx.fragment.app.FragmentActivity

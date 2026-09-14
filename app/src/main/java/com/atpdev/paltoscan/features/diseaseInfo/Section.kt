@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.diseaseInfo
+package com.atpdev.paltoscan.features.diseaseInfo
 
 sealed class Section(val title: String) {
     /*object Enfermedad : Section("Enfermedad")

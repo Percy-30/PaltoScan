@@ -1,4 +1,4 @@
-﻿import android.animation.Animator
+import android.animation.Animator
 import timber.log.Timber
 import android.os.Bundle
 import android.view.LayoutInflater

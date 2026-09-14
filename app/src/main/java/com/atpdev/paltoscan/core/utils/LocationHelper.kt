@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.core.utils
+package com.atpdev.paltoscan.core.utils
 
 import android.Manifest
 import android.content.Context

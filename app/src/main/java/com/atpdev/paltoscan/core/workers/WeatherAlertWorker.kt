@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.core.workers
+package com.atpdev.paltoscan.core.workers
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

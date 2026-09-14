@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.data.local.db
+package com.atpdev.paltoscan.data.local.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

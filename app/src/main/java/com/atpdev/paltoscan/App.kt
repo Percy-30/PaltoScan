@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan
+package com.atpdev.paltoscan
 
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory

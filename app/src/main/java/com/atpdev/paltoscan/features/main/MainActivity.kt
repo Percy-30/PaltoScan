@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.main
+package com.atpdev.paltoscan.features.main
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

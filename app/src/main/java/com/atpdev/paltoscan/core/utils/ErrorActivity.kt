@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.core.utils
+package com.atpdev.paltoscan.core.utils
 
 import android.content.Intent
 import android.os.Bundle

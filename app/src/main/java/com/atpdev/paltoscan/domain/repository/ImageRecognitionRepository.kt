@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.domain.repository
+package com.atpdev.paltoscan.domain.repository
 
 import android.graphics.Bitmap
 import com.atpdev.paltoscan.domain.model.RecognitionResult

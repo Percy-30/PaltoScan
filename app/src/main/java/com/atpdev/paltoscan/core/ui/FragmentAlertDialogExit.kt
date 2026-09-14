@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.core.ui
+package com.atpdev.paltoscan.core.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan
+package com.atpdev.paltoscan
 
 import org.junit.Assert.*
 import org.junit.Test

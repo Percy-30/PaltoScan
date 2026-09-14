@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.features.diseaseInfo
+package com.atpdev.paltoscan.features.diseaseInfo
 
 import android.content.Context
 import timber.log.Timber

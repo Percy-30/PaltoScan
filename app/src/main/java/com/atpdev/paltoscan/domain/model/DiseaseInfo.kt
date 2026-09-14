@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.domain.model
+package com.atpdev.paltoscan.domain.model
 
 data class DiseaseInfo(
     val name: String,

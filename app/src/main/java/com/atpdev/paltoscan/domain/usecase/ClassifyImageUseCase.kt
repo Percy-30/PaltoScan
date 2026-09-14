@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.domain.usecase
+package com.atpdev.paltoscan.domain.usecase
 
 class ClassifyImageUseCase {
     /*

@@ -1,4 +1,4 @@
-﻿package com.atpdev.app.ui.splash
+package com.atpdev.app.ui.splash
 
 import android.os.Build
 import android.os.Bundle
