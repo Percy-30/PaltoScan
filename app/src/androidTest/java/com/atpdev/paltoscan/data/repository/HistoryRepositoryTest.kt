@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.data.repository
+package com.atpdev.paltoscan.data.repository
 
 import android.content.Context
 import androidx.room.Room
@@ -36,12 +36,12 @@ class HistoryRepositoryTest {
     fun insertAndGetHistory() = runBlocking {
         // Arrange
         val history = History(
-            diseaseName = "Tizón Tardío",
+            diseaseName = "Antracnosis",
             section = "PaltoScan",
-            description = "Enfermedad grave de la papa",
-            prevention = "Uso de fungicidas",
-            causes = "Hongo Phytophthora infestans",
-            treatment = "Fungicidas específicos",
+            description = "Enfermedad fúngica del palto causada por Colletotrichum gloeosporioides",
+            prevention = "Poda sanitaria y fungicidas preventivos",
+            causes = "Hongo Colletotrichum gloeosporioides",
+            treatment = "Fungicidas específicos (Azoxystrobina, Tebuconazol)",
             timestamp = System.currentTimeMillis(),
             imagePath = "hash_12345"
         )
@@ -53,19 +53,19 @@ class HistoryRepositoryTest {
         // Assert
         assertThat(insertedId).isGreaterThan(0L)
         assertThat(retrieved).isNotNull()
-        assertThat(retrieved?.diseaseName).isEqualTo("Tizón Tardío")
+        assertThat(retrieved?.diseaseName).isEqualTo("Antracnosis")
     }
 
     @Test
     fun clearAllHistory() = runBlocking {
         // Arrange
         val history = History(
-            diseaseName = "Tizón Temprano",
+            diseaseName = "Cercospora",
             section = "PaltoScan",
-            description = "Enfermedad foliar",
-            prevention = "Rotación de cultivos",
-            causes = "Hongo Alternaria solani",
-            treatment = "Fungicidas",
+            description = "Mancha foliar causada por Cercospora purpurea",
+            prevention = "Ventilación adecuada y fungicidas preventivos",
+            causes = "Hongo Cercospora purpurea",
+            treatment = "Mancozeb o Clorotalonil",
             timestamp = System.currentTimeMillis(),
             imagePath = "hash_67890"
         )

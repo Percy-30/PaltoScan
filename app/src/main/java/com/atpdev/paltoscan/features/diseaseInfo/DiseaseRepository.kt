@@ -1,78 +1,77 @@
-﻿package com.atpdev.paltoscan.features.diseaseInfo
+package com.atpdev.paltoscan.features.diseaseInfo
 
 import com.atpdev.paltoscan.domain.model.DiseaseInfo
 
 object DiseaseRepository {
     val diseaseDatabase =
         mapOf(
-            "Quemazon" to
-                DiseaseInfo( // -> Early_Blight,   Ojo de Pájaro , Pitiquiña
-                    name = "Quemazon",
+            "Antracnosis" to
+                DiseaseInfo(
+                    name = "Antracnosis",
                     description =
-                        "La quemazón es una enfermedad fúngica causada por el hongo Alternaria solani. " +
-                            "Afecta las hojas y el tallo de la papa, causando lesiones oscuras y redondas que pueden provocar la muerte de la planta. " +
-                            "La enfermedad se caracteriza por la aparición de manchas oscuras y redondas en las hojas, que pueden fusionarse y cubrir grandes áreas de la planta.",
+                        "La antracnosis es una enfermedad fúngica causada por el hongo Colletotrichum gloeosporioides. " +
+                            "Afecta principalmente los frutos, hojas y ramas del palto, causando lesiones necróticas de color oscuro que pueden hundir los tejidos afectados. " +
+                            "En hojas jóvenes provoca manchas marrones irregulares con bordes amarillentos que con el tiempo se necrosan completamente, comprometiendo la capacidad fotosintética del árbol.",
                     prevention =
-                        "Para prevenir la aparición de la quemazón, es importante implementar las siguientes medidas: <br><br>" +
-                            "<b>&#42; Selección de variedades resistentes:</b> Seleccionar variedades de papa que sean resistentes a la quemazón puede ayudar a reducir el riesgo de infección. <br><br>" +
-                            "<b>&#42; Rotación de cultivos:</b> Rotar los cultivos puede ayudar a reducir el riesgo de infección, ya que el hongo que causa la quemazón puede sobrevivir en el suelo durante varios años. <br><br>" +
-                            "<b>&#42; Control de la humedad:</b> La humedad es un factor importante en el desarrollo de la quemazón. Reducir la humedad en el campo mediante la implementación de sistemas de riego eficientes y la eliminación de malezas puede ayudar a reducir el riesgo de infección. <br><br>" +
-                            "<b>&#42; Eliminación de plantas infectadas:</b> Eliminar las plantas infectadas puede ayudar a reducir la propagación de la enfermedad.",
+                        "Para prevenir la aparición de la antracnosis, es importante implementar las siguientes medidas: <br><br>" +
+                            "<b>&#42; Poda sanitaria:</b> Eliminar ramas y hojas infectadas para reducir la fuente de inóculo. <br><br>" +
+                            "<b>&#42; Ventilación adecuada:</b> Mantener una densidad de copa que permita buena circulación de aire y penetración solar. <br><br>" +
+                            "<b>&#42; Control de humedad:</b> Evitar el exceso de humedad en el follaje; usar riego por goteo en lugar de aspersión aérea. <br><br>" +
+                            "<b>&#42; Desinfección de herramientas:</b> Limpiar y desinfectar tijeras y herramientas de poda para evitar la propagación del hongo.",
                     causes =
-                        "La quemazón es causada por el hongo Alternaria solani. Este hongo puede sobrevivir en el suelo durante varios años y se propaga mediante esporas que se liberan en el aire y el agua. <br><br>" +
-                            "<b>&#42; El hongo Alternaria solani. </b><br>" +
-                            "<b>&#42; Temperaturas moderadas (15-25°C). </b><br>" +
-                            "<b>&#42; Humedad relativa alta (>60%). </b><br>" +
-                            "<b>&#42; Lesiones en la planta. </b>",
+                        "La antracnosis es causada por el hongo Colletotrichum gloeosporioides. Sus esporas se diseminan mediante agua, viento e insectos. <br><br>" +
+                            "<b>&#42; Hongo Colletotrichum gloeosporioides. </b><br>" +
+                            "<b>&#42; Temperaturas cálidas (25–30°C). </b><br>" +
+                            "<b>&#42; Alta humedad relativa (>80%). </b><br>" +
+                            "<b>&#42; Heridas o lesiones en la planta. </b>",
                     treatment =
-                        "El tratamiento de la quemazón implica la aplicación de fungicidas específicos y la implementación de medidas de control cultural. Algunas opciones de tratamiento incluyen: <br><br>" +
-                            "<b>&#42; Aplicación de fungicidas:</b> Los fungicidas pueden ser aplicados en forma de polvo o líquido para controlar la propagación de la enfermedad. <br><br>" +
-                            "<b>&#42; Control de la humedad:</b> Reducir la humedad en el campo puede ayudar a reducir la propagación de la enfermedad. <br><br>" +
-                            "<b>&#42; Eliminación de plantas infectadas:</b> Eliminar las plantas infectadas puede ayudar a reducir la propagación de la enfermedad. <br><br>" +
-                            "<b>&#42; Mejora de la ventilación:</b> Mejorar la ventilación en el campo puede ayudar a reducir la humedad y la propagación de la enfermedad.",
+                        "El tratamiento de la antracnosis implica la aplicación de fungicidas específicos y medidas culturales: <br><br>" +
+                            "<b>&#42; Fungicidas cúpricos:</b> Aplicar fungicidas a base de cobre (Oxicloruro de cobre) como preventivo. <br><br>" +
+                            "<b>&#42; Fungicidas sistémicos:</b> Usar productos como Azoxystrobina o Tebuconazol en infecciones activas. <br><br>" +
+                            "<b>&#42; Eliminación de tejido infectado:</b> Podar y destruir las partes afectadas para evitar la dispersión. <br><br>" +
+                            "<b>&#42; Mejora del drenaje:</b> Asegurar que el suelo tenga buen drenaje para evitar condiciones favorables al hongo.",
                 ),
             "Hoja_Saludable" to
                 DiseaseInfo(
-                    name = " Hoja_Saludable",
-                    description = ": La planta de papa se encuentra en un estado saludable y sin síntomas de enfermedad.",
-                    prevention = "Mantener prácticas agrícolas saludables, como la rotación de cultivos y el control de plagas.",
-                    causes = "Causas papa Saludable,  No aplica",
-                    treatment = "Tratamineto No aplica.",
+                    name = "Hoja Saludable",
+                    description = "La planta de palto se encuentra en un estado saludable y sin síntomas visibles de enfermedad. Las hojas presentan coloración verde uniforme, sin manchas, necrosis ni deformaciones.",
+                    prevention = "Mantener prácticas agrícolas saludables como la fertilización balanceada, el riego eficiente, la poda sanitaria periódica y el monitoreo constante del cultivo para detectar anomalías a tiempo.",
+                    causes = "No aplica. La hoja está sana.",
+                    treatment = "No aplica. Se recomienda continuar con el manejo agronómico preventivo.",
                 ),
-            "Rancha" to
-                DiseaseInfo( // Late_Blight //Rancha
-                    name = "Rancha",
+            "Cercospora" to
+                DiseaseInfo(
+                    name = "Cercospora",
                     description =
-                        "La rancha es una enfermedad fúngica causada por el hongo Phytophthora infestans. " +
-                            "Afecta las hojas y el tallo de la papa, causando lesiones oscuras y húmedas " +
-                            "La enfermedad se caracteriza por la aparición de manchas oscuras y redondas en las hojas, que pueden fusionarse y cubrir grandes áreas de la planta." +
-                            "La rancha puede causar daños significativos en la cosecha, especialmente si no se controla de manera efectiva.",
+                        "La mancha por Cercospora es una enfermedad fúngica causada por Cercospora purpurea. " +
+                            "Produce manchas angulares de color amarillo-verdoso en el haz de la hoja y una coloración púrpura o marrón en el envés. " +
+                            "En ataques severos puede provocar defoliación prematura y reducción significativa en la producción del palto.",
                     prevention =
-                        "Para prevenir la aparición de la rancha, es importante implementar las siguientes medidas: <br><br>" +
-                            "<b>&#42; Selección de variedades de papa resistentes:</b> Seleccionar variedades de papa que sean resistentes a la rancha puede ayudar a reducir el riesgo de infección. <br><br>" +
-                            "<b>&#42; Rotación de cultivos:</b> Rotar los cultivos puede ayudar a reducir el riesgo de infección, ya que el hongo que causa la rancha puede sobrevivir en el suelo durante varios años. <br><br>" +
-                            "<b>&#42; Control de la humedad:</b> La humedad es un factor importante en el desarrollo de la rancha. Reducir la humedad en el campo mediante la implementación de sistemas de riego eficientes y la eliminación de malezas puede ayudar a reducir el riesgo de infección. <br> <br>" +
-                            "<b>&#42; Eliminación de plantas infectadas:</b> Eliminar las plantas infectadas puede ayudar a reducir la propagación de la enfermedad. <br><br>" +
-                            "<b>&#42; Uso de mulch para reducir la humedad en el suelo.<b>",
+                        "Para prevenir la Cercospora en el palto: <br><br>" +
+                            "<b>&#42; Monitoreo frecuente:</b> Inspeccionar regularmente el follaje para detectar los primeros síntomas. <br><br>" +
+                            "<b>&#42; Densidad de plantación:</b> Mantener distancias adecuadas entre plantas para favorecer la ventilación. <br><br>" +
+                            "<b>&#42; Control de malezas:</b> Eliminar malezas que puedan actuar como hospederos alternativos del hongo. <br><br>" +
+                            "<b>&#42; Fertilización equilibrada:</b> Evitar exceso de nitrógeno que genera follaje suculento y más susceptible.",
                     causes =
-                        "La rancha es causada por el hongo Phytophthora infestans. Este hongo puede sobrevivir en el suelo durante varios años y se propaga mediante esporas que se liberan en el aire y el agua. <br><br>" +
-                            "<b>&#42; El hongo Phytophthora infestans. </b> <br>" +
-                            "<b>&#42; Temperaturas frescas (10-15°C). </b> <br>" +
-                            "<b>&#42; Humedad relativa alta (>80%). </b> <br>" +
-                            "<b>&#42; Lesiones en la planta.</b>",
+                        "Causada por el hongo Cercospora purpurea, cuyas esporas se diseminan mediante el viento y el agua. <br><br>" +
+                            "<b>&#42; Hongo Cercospora purpurea. </b><br>" +
+                            "<b>&#42; Temperaturas de 20–28°C. </b><br>" +
+                            "<b>&#42; Períodos de humedad prolongados. </b><br>" +
+                            "<b>&#42; Exceso de nitrógeno en el follaje. </b>",
                     treatment =
-                        "El tratamiento de la rancha implica la aplicación de fungicidas específicos y la implementación de medidas de control cultural. Algunas opciones de tratamiento incluyen: <br><br>" +
-                            "<b>&#42; Aplicación de fungicidas:</b> Los fungicidas pueden ser aplicados en forma de polvo o líquido para controlar la propagación de la enfermedad. <br><br>" +
-                            "<b>&#42; Control de la humedad:</b> Reducir la humedad en el campo puede ayudar a reducir la propagación de la enfermedad. <br><br>" +
-                            "<b>&#42; Eliminación de plantas infectadas:</b> Eliminar las plantas infectadas puede ayudar a reducir la propagación de la enfermedad. ",
+                        "Para tratar la Cercospora en palto: <br><br>" +
+                            "<b>&#42; Fungicidas preventivos:</b> Aplicar fungicidas cúpricos al inicio de las lluvias o períodos húmedos. <br><br>" +
+                            "<b>&#42; Fungicidas curativos:</b> Usar productos a base de Mancozeb o Clorotalonil en infecciones establecidas. <br><br>" +
+                            "<b>&#42; Poda de hojas afectadas:</b> Remover y destruir el material vegetal infectado. <br><br>" +
+                            "<b>&#42; Mejorar la ventilación:</b> Realizar podas de formación para abrir la copa del árbol.",
                 ),
             "No_Identificado" to
                 DiseaseInfo(
-                    name = "No_Identificado",
-                    description = "Descripción no disponible",
-                    prevention = "Prevención No disponible",
-                    causes = "Cuasas No disponible",
-                    treatment = "Tratamiento no disponible",
+                    name = "No Identificado",
+                    description = "La imagen no corresponde a ninguna de las categorías reconocidas por PaltoScan, o la calidad de la imagen es insuficiente para realizar un diagnóstico preciso.",
+                    prevention = "Asegúrese de tomar la foto con buena iluminación, encuadrando correctamente la hoja de palto. Evite fondos con muchos objetos y asegúrese de que la hoja ocupe la mayor parte de la imagen.",
+                    causes = "No disponible. El modelo no pudo identificar la condición de la hoja con suficiente certeza.",
+                    treatment = "No disponible. Se recomienda consultar a un agrónomo especialista para un diagnóstico presencial.",
                 ),
         )
 }
