@@ -1,4 +1,4 @@
-﻿package com.atpdev.paltoscan.core.ml
+package com.atpdev.paltoscan.core.ml
 
 import android.content.Context
 import timber.log.Timber
@@ -30,25 +30,26 @@ class TensorFlowHelper
         private lateinit var inputTensor: Tensor
         private lateinit var outputTensor: Tensor
         private val model: Interpreter
-        private val inputSize = 256 // Cambia de 250 a 512  // Tamaño de entrada esperado por el modelo
+        private val inputSize = 224 // MobileNetV3Large - entrada 224x224 (confirmado por el modelo exportado)
 
         private var error: String? = null
 
         private val classNames: List<String> by lazy { loadLabels() }
 
         companion object {
-            private const val NUM_CLASSES = 4 // Ajusta este valor según el número de clases en tu modelo
-            private const val THRESHOLD = 0.5f // Ajusta este valor según tus necesidades de detección
+            private const val NUM_CLASSES = 11 // PaltoScan: 11 clases de enfermedades del palto (MobileNetV3Large)
+            private const val THRESHOLD = 0.5f // Umbral de confianza mínima para aceptar una predicción
         }
 
         init {
-            var selectedModel = "ml/fine_tune_model_gradcam.tflite"
+            // Modelo principal: MobileNetV3Large entrenado para 11 clases de enfermedades del palto
+            var selectedModel = "ml/paltoscan_MobileNetV3Large_Inicial.tflite"
             var modelFile: ByteBuffer? = null
             try {
                 modelFile = FileUtil.loadMappedFile(context, selectedModel)
-                Timber.tag("TensorFlowHelper").d("Cargado modelo Grad-CAM")
+                Timber.tag("TensorFlowHelper").d("Cargado modelo PaltoScan MobileNetV3Large (11 clases)")
             } catch (e: Exception) {
-                Timber.tag("TensorFlowHelper").w("No se encontró el modelo Grad-CAM, usando fallback")
+                Timber.tag("TensorFlowHelper").w("No se encontró el modelo principal, usando fallback")
                 selectedModel = "ml/model_mobilenet.tflite"
                 modelFile = FileUtil.loadMappedFile(context, selectedModel)
             }
@@ -103,12 +104,12 @@ class TensorFlowHelper
             // Preprocesar la imagen
             val inputImage = preprocessBitmap(bitmap)
 
-            // Salida del modelo
+            // Salida del modelo — 11 clases (PaltoScan MobileNetV3Large)
             val outputBuffer =
                 TensorBuffer.createFixedSize(
-                    intArrayOf(1, 4),
+                    intArrayOf(1, NUM_CLASSES),
                     DataType.FLOAT32,
-                ) // Asegúrate de que la forma coincida con el modelo
+                ) // [1, 11] — coincide con output TensorSpec shape=(None, 11)
             // val outputBuffer = TensorBuffer.createFixedSize(outputTensor.shape(), DataType.FLOAT32)  // Asegúrate de que la forma coincida con el modelo
 
             // Ejecutar la inferencia
@@ -242,9 +243,8 @@ class TensorFlowHelper
         }
 
         private fun getOutputSize(): Int {
-            // Devuelve el tamaño de la salida basado en las etiquetas
-            // Puedes ajustar este valor manualmente o inferirlo del modelo
-            return 3 // Número de clases del modelo (ajustar según el modelo)
+            // PaltoScan MobileNetV3Large — 11 clases de enfermedades del palto
+            return NUM_CLASSES
         }
 
         fun getError(): String? {
