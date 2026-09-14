@@ -2,76 +2,213 @@ package com.atpdev.paltoscan.features.diseaseInfo
 
 import com.atpdev.paltoscan.domain.model.DiseaseInfo
 
+/**
+ * Base de datos de enfermedades y plagas del palto (Persea americana).
+ * Clases basadas en los datasets:
+ *  - AvocadoPest3 (Mendeley DOI: 10.17632/r3cswdjnpd.1): 9 clases de plagas
+ *  - K-Kotagiri Avocado Leaf Dataset (Mendeley DOI: 10.17632/6zy6wxhf2v.1): Healthy + OtherDiseases
+ */
 object DiseaseRepository {
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Textos reutilizables
+    // ──────────────────────────────────────────────────────────────────────────
+    private val prevCaloptilia =
+        "Para prevenir el minador de la hoja (<i>Caloptilia perseae</i>): <br><br>" +
+            "<b>&#42; Monitoreo regular:</b> Inspeccionar el envés de las hojas jóvenes en busca de larvas o galerías sinuosas. <br><br>" +
+            "<b>&#42; Control biológico:</b> Favorecer la presencia de parasitoides naturales como <i>Cirrospilus</i> spp. evitando el uso indiscriminado de insecticidas. <br><br>" +
+            "<b>&#42; Poda sanitaria:</b> Eliminar y destruir hojas fuertemente infestadas para reducir la población de la plaga. <br><br>" +
+            "<b>&#42; Riego adecuado:</b> Mantener la planta con buena nutrición para que produzca brotes vigorosos y resistentes."
+
+    private val causasCaloptilia =
+        "Plaga causada por la polilla minadora <i>Caloptilia perseae</i> (Lepidoptera: Gracillariidae). <br><br>" +
+            "<b>&#42; Larvas que minan el tejido foliar, creando galerías sinuosas. </b><br>" +
+            "<b>&#42; Altas temperaturas (>25°C) aceleran el ciclo de vida. </b><br>" +
+            "<b>&#42; Brotes tiernos jóvenes son el objetivo principal. </b><br>" +
+            "<b>&#42; Mayor incidencia en períodos secos. </b>"
+
+    private val tratCaloptilia =
+        "Para tratar el minador de la hoja en palto: <br><br>" +
+            "<b>&#42; Insecticidas sistémicos:</b> Aplicar Imidacloprid o Spinosad en las primeras etapas de infestación para alcanzar las larvas dentro del tejido. <br><br>" +
+            "<b>&#42; Control biológico:</b> Liberar avispas parasitoides del género <i>Cirrospilus</i> o <i>Pnigalio</i> cuando la infestación supera el umbral económico. <br><br>" +
+            "<b>&#42; Aceites minerales:</b> Aplicar aceite agrícola en estadios tempranos para sufocar huevos y larvas jóvenes. <br><br>" +
+            "<b>&#42; Eliminación de hojas infestadas:</b> En ataques avanzados, retirar manualmente las hojas más afectadas."
+
+    private val prevOligonychus =
+        "Para prevenir los ácaros (<i>Oligonychus</i> spp.) en palto: <br><br>" +
+            "<b>&#42; Monitoreo periódico:</b> Revisar el envés de las hojas con lupa para detectar colonias en etapas tempranas. <br><br>" +
+            "<b>&#42; Control biológico:</b> Conservar ácaros depredadores naturales como <i>Phytoseiidae</i> evitando el uso excesivo de insecticidas. <br><br>" +
+            "<b>&#42; Manejo del riego:</b> Mantener humedad adecuada; la sequía favorece las poblaciones de ácaros. <br><br>" +
+            "<b>&#42; Evitar exceso de nitrógeno:</b> El follaje suculento por exceso de nitrógeno atrae y favorece la reproducción de ácaros."
+
+    private val causasOligonychusPerseae =
+        "Plaga causada por el ácaro de la persea <i>Oligonychus perseae</i> (Acari: Tetranychidae). <br><br>" +
+            "<b>&#42; Ácaros que colonizan el haz de la hoja, succionando savia. </b><br>" +
+            "<b>&#42; Temperaturas cálidas (25–35°C) y baja humedad favorecen su reproducción. </b><br>" +
+            "<b>&#42; Producen clorosis y bronceado en el haz de la hoja. </b><br>" +
+            "<b>&#42; En ataques severos causan defoliación prematura. </b>"
+
+    private val causasOligonychusPublicae =
+        "Plaga causada por el ácaro rojo de la palma <i>Oligonychus punicae</i> (Acari: Tetranychidae). <br><br>" +
+            "<b>&#42; Ácaros que atacan principalmente el haz de las hojas maduras. </b><br>" +
+            "<b>&#42; Produce manchas pardas y rojas típicas en la lámina foliar. </b><br>" +
+            "<b>&#42; Climas cálidos y secos aceleran su ciclo reproductivo. </b><br>" +
+            "<b>&#42; Puede generar telarañas finas sobre la superficie foliar. </b>"
+
+    private val tratOligonychus =
+        "Para tratar los ácaros en palto: <br><br>" +
+            "<b>&#42; Acaricidas:</b> Aplicar productos a base de Abamectina, Bifenazato o Spirodiclofen rotando principios activos para evitar resistencia. <br><br>" +
+            "<b>&#42; Azufre mojable:</b> Efectivo como preventivo y en etapas iniciales de la infestación. <br><br>" +
+            "<b>&#42; Aceites minerales o de neem:</b> Sufocan huevos y estados móviles jóvenes. <br><br>" +
+            "<b>&#42; Riego por aspersión:</b> En algunas situaciones, mojar el follaje ayuda a reducir poblaciones al romper las telarañas."
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Base de datos de enfermedades — 11 clases
+    // ──────────────────────────────────────────────────────────────────────────
     val diseaseDatabase =
         mapOf(
-            "Antracnosis" to
+            // ─── CALOPTILIA PERSEAE ───────────────────────────────────────────
+            "Caloptilia_perseae_Inicial" to
                 DiseaseInfo(
-                    name = "Antracnosis",
+                    name = "Minador de Hoja — Nivel Inicial",
                     description =
-                        "La antracnosis es una enfermedad fúngica causada por el hongo Colletotrichum gloeosporioides. " +
-                            "Afecta principalmente los frutos, hojas y ramas del palto, causando lesiones necróticas de color oscuro que pueden hundir los tejidos afectados. " +
-                            "En hojas jóvenes provoca manchas marrones irregulares con bordes amarillentos que con el tiempo se necrosan completamente, comprometiendo la capacidad fotosintética del árbol.",
-                    prevention =
-                        "Para prevenir la aparición de la antracnosis, es importante implementar las siguientes medidas: <br><br>" +
-                            "<b>&#42; Poda sanitaria:</b> Eliminar ramas y hojas infectadas para reducir la fuente de inóculo. <br><br>" +
-                            "<b>&#42; Ventilación adecuada:</b> Mantener una densidad de copa que permita buena circulación de aire y penetración solar. <br><br>" +
-                            "<b>&#42; Control de humedad:</b> Evitar el exceso de humedad en el follaje; usar riego por goteo en lugar de aspersión aérea. <br><br>" +
-                            "<b>&#42; Desinfección de herramientas:</b> Limpiar y desinfectar tijeras y herramientas de poda para evitar la propagación del hongo.",
-                    causes =
-                        "La antracnosis es causada por el hongo Colletotrichum gloeosporioides. Sus esporas se diseminan mediante agua, viento e insectos. <br><br>" +
-                            "<b>&#42; Hongo Colletotrichum gloeosporioides. </b><br>" +
-                            "<b>&#42; Temperaturas cálidas (25–30°C). </b><br>" +
-                            "<b>&#42; Alta humedad relativa (>80%). </b><br>" +
-                            "<b>&#42; Heridas o lesiones en la planta. </b>",
-                    treatment =
-                        "El tratamiento de la antracnosis implica la aplicación de fungicidas específicos y medidas culturales: <br><br>" +
-                            "<b>&#42; Fungicidas cúpricos:</b> Aplicar fungicidas a base de cobre (Oxicloruro de cobre) como preventivo. <br><br>" +
-                            "<b>&#42; Fungicidas sistémicos:</b> Usar productos como Azoxystrobina o Tebuconazol en infecciones activas. <br><br>" +
-                            "<b>&#42; Eliminación de tejido infectado:</b> Podar y destruir las partes afectadas para evitar la dispersión. <br><br>" +
-                            "<b>&#42; Mejora del drenaje:</b> Asegurar que el suelo tenga buen drenaje para evitar condiciones favorables al hongo.",
+                        "Infestación incipiente de <i>Caloptilia perseae</i>, el minador de la hoja del palto. " +
+                            "Se observan las primeras galerías sinuosas superficiales en hojas jóvenes, causadas por larvas que minan el tejido entre la epidermis y el parénquima. " +
+                            "El daño es puntual y la planta aún no muestra síntomas sistémicos.",
+                    prevention = prevCaloptilia,
+                    causes = causasCaloptilia,
+                    treatment = tratCaloptilia,
                 ),
-            "Hoja_Saludable" to
+            "Caloptilia_perseae_Intermedio" to
+                DiseaseInfo(
+                    name = "Minador de Hoja — Nivel Intermedio",
+                    description =
+                        "Infestación moderada de <i>Caloptilia perseae</i>. " +
+                            "Las galerías se extienden por varias hojas con decoloración amarillenta visible. " +
+                            "Algunas hojas comienzan a enrollarse en los bordes (síntoma característico de larvas en estadios más avanzados). " +
+                            "La fotosíntesis se ve parcialmente comprometida.",
+                    prevention = prevCaloptilia,
+                    causes = causasCaloptilia,
+                    treatment = tratCaloptilia,
+                ),
+            "Caloptilia_perseae_Avanzado" to
+                DiseaseInfo(
+                    name = "Minador de Hoja — Nivel Avanzado",
+                    description =
+                        "Infestación severa de <i>Caloptilia perseae</i>. " +
+                            "Múltiples hojas presentan extensa necrosis de los tejidos minados, enrollamiento pronunciado y caída prematura. " +
+                            "La pérdida foliar impacta directamente la producción del árbol y facilita la entrada de enfermedades secundarias.",
+                    prevention = prevCaloptilia,
+                    causes = causasCaloptilia,
+                    treatment = tratCaloptilia,
+                ),
+
+            // ─── OLIGONYCHUS PERSEAE ──────────────────────────────────────────
+            "Oligonychus_perseae_Inicial" to
+                DiseaseInfo(
+                    name = "Ácaro de la Persea — Nivel Inicial",
+                    description =
+                        "Colonias incipientes de <i>Oligonychus perseae</i> en el haz de las hojas. " +
+                            "Se observan pequeñas manchas cloróticas puntiformes y presencia de finas telarañas. " +
+                            "El impacto en la planta es mínimo en esta etapa.",
+                    prevention = prevOligonychus,
+                    causes = causasOligonychusPerseae,
+                    treatment = tratOligonychus,
+                ),
+            "Oligonychus_perseae_Intermedio" to
+                DiseaseInfo(
+                    name = "Ácaro de la Persea — Nivel Intermedio",
+                    description =
+                        "Infestación moderada de <i>Oligonychus perseae</i>. " +
+                            "Las hojas muestran clorosis generalizada en el haz, con aspecto plateado-plateado o bronceado. " +
+                            "Se evidencia presencia masiva de ácaros, huevos y exuvias. " +
+                            "La tasa fotosintética de la planta disminuye notablemente.",
+                    prevention = prevOligonychus,
+                    causes = causasOligonychusPerseae,
+                    treatment = tratOligonychus,
+                ),
+            "Oligonychus_perseae_Avanzado" to
+                DiseaseInfo(
+                    name = "Ácaro de la Persea — Nivel Avanzado",
+                    description =
+                        "Infestación severa de <i>Oligonychus perseae</i>. " +
+                            "Hojas con bronceado intenso, defoliación prematura y presencia de densas telarañas. " +
+                            "El árbol puede perder gran parte de su follaje, reduciendo significativamente la producción de frutos.",
+                    prevention = prevOligonychus,
+                    causes = causasOligonychusPerseae,
+                    treatment = tratOligonychus,
+                ),
+
+            // ─── OLIGONYCHUS PUNICAE ──────────────────────────────────────────
+            "Oligonychus_punicae_Inicial" to
+                DiseaseInfo(
+                    name = "Ácaro Rojo — Nivel Inicial",
+                    description =
+                        "Primeras colonias de <i>Oligonychus punicae</i> sobre hojas maduras. " +
+                            "Se aprecian manchas pequeñas de color pardo-rojizo en el haz, sin telarañas visibles a simple vista. " +
+                            "La infestación es localizada y controlable.",
+                    prevention = prevOligonychus,
+                    causes = causasOligonychusPublicae,
+                    treatment = tratOligonychus,
+                ),
+            "Oligonychus_punicae_Intermedio" to
+                DiseaseInfo(
+                    name = "Ácaro Rojo — Nivel Intermedio",
+                    description =
+                        "Infestación moderada de <i>Oligonychus punicae</i>. " +
+                            "Las manchas pardas cubren áreas más extensas del haz, con presencia de ácaros visibles y telarañas finas. " +
+                            "La hoja adquiere un aspecto sucio rojizo-pardo. Impacto moderado sobre la fotosíntesis.",
+                    prevention = prevOligonychus,
+                    causes = causasOligonychusPublicae,
+                    treatment = tratOligonychus,
+                ),
+            "Oligonychus_punicae_Avanzado" to
+                DiseaseInfo(
+                    name = "Ácaro Rojo — Nivel Avanzado",
+                    description =
+                        "Infestación severa de <i>Oligonychus punicae</i>. " +
+                            "Las hojas presentan coloración roja-parda generalizada, abundantes telarañas y posible defoliación. " +
+                            "El árbol entra en estrés hídrico y nutricional. Requiere intervención inmediata.",
+                    prevention = prevOligonychus,
+                    causes = causasOligonychusPublicae,
+                    treatment = tratOligonychus,
+                ),
+
+            // ─── HEALTHY ──────────────────────────────────────────────────────
+            "Healthy" to
                 DiseaseInfo(
                     name = "Hoja Saludable",
-                    description = "La planta de palto se encuentra en un estado saludable y sin síntomas visibles de enfermedad. Las hojas presentan coloración verde uniforme, sin manchas, necrosis ni deformaciones.",
-                    prevention = "Mantener prácticas agrícolas saludables como la fertilización balanceada, el riego eficiente, la poda sanitaria periódica y el monitoreo constante del cultivo para detectar anomalías a tiempo.",
-                    causes = "No aplica. La hoja está sana.",
-                    treatment = "No aplica. Se recomienda continuar con el manejo agronómico preventivo.",
-                ),
-            "Cercospora" to
-                DiseaseInfo(
-                    name = "Cercospora",
                     description =
-                        "La mancha por Cercospora es una enfermedad fúngica causada por Cercospora purpurea. " +
-                            "Produce manchas angulares de color amarillo-verdoso en el haz de la hoja y una coloración púrpura o marrón en el envés. " +
-                            "En ataques severos puede provocar defoliación prematura y reducción significativa en la producción del palto.",
+                        "La hoja de palto se encuentra en condiciones óptimas: coloración verde uniforme, superficie limpia y sin síntomas de plagas, manchas, necrosis ni deformaciones. " +
+                            "Indica un manejo agronómico adecuado del cultivo.",
                     prevention =
-                        "Para prevenir la Cercospora en el palto: <br><br>" +
-                            "<b>&#42; Monitoreo frecuente:</b> Inspeccionar regularmente el follaje para detectar los primeros síntomas. <br><br>" +
-                            "<b>&#42; Densidad de plantación:</b> Mantener distancias adecuadas entre plantas para favorecer la ventilación. <br><br>" +
-                            "<b>&#42; Control de malezas:</b> Eliminar malezas que puedan actuar como hospederos alternativos del hongo. <br><br>" +
-                            "<b>&#42; Fertilización equilibrada:</b> Evitar exceso de nitrógeno que genera follaje suculento y más susceptible.",
-                    causes =
-                        "Causada por el hongo Cercospora purpurea, cuyas esporas se diseminan mediante el viento y el agua. <br><br>" +
-                            "<b>&#42; Hongo Cercospora purpurea. </b><br>" +
-                            "<b>&#42; Temperaturas de 20–28°C. </b><br>" +
-                            "<b>&#42; Períodos de humedad prolongados. </b><br>" +
-                            "<b>&#42; Exceso de nitrógeno en el follaje. </b>",
-                    treatment =
-                        "Para tratar la Cercospora en palto: <br><br>" +
-                            "<b>&#42; Fungicidas preventivos:</b> Aplicar fungicidas cúpricos al inicio de las lluvias o períodos húmedos. <br><br>" +
-                            "<b>&#42; Fungicidas curativos:</b> Usar productos a base de Mancozeb o Clorotalonil en infecciones establecidas. <br><br>" +
-                            "<b>&#42; Poda de hojas afectadas:</b> Remover y destruir el material vegetal infectado. <br><br>" +
-                            "<b>&#42; Mejorar la ventilación:</b> Realizar podas de formación para abrir la copa del árbol.",
+                        "Para mantener la salud del palto: <br><br>" +
+                            "<b>&#42; Fertilización balanceada:</b> Aplicar nutrientes según análisis de suelo para evitar deficiencias y excesos. <br><br>" +
+                            "<b>&#42; Riego eficiente:</b> Mantener humedad uniforme; el palto es sensible tanto a la falta como al exceso de agua. <br><br>" +
+                            "<b>&#42; Podas sanitarias periódicas:</b> Eliminar ramas secas, enfermas o con signos de plaga. <br><br>" +
+                            "<b>&#42; Monitoreo constante:</b> Inspeccionar el cultivo regularmente para detectar problemas en etapas tempranas.",
+                    causes = "No aplica. La hoja está sana.",
+                    treatment = "No aplica. Continuar con el manejo agronómico preventivo establecido.",
                 ),
-            "No_Identificado" to
+
+            // ─── OTHER DISEASES ───────────────────────────────────────────────
+            "OtherDiseases" to
                 DiseaseInfo(
-                    name = "No Identificado",
-                    description = "La imagen no corresponde a ninguna de las categorías reconocidas por PaltoScan, o la calidad de la imagen es insuficiente para realizar un diagnóstico preciso.",
-                    prevention = "Asegúrese de tomar la foto con buena iluminación, encuadrando correctamente la hoja de palto. Evite fondos con muchos objetos y asegúrese de que la hoja ocupe la mayor parte de la imagen.",
-                    causes = "No disponible. El modelo no pudo identificar la condición de la hoja con suficiente certeza.",
-                    treatment = "No disponible. Se recomienda consultar a un agrónomo especialista para un diagnóstico presencial.",
+                    name = "Otras Enfermedades",
+                    description =
+                        "La hoja de palto muestra síntomas de una condición patológica no clasificada dentro de las plagas principales detectadas por PaltoScan. " +
+                            "Puede tratarse de enfermedades fúngicas (Antracnosis, Cercospora, Roña), deficiencias nutricionales, daños abióticos u otras patologías.",
+                    prevention =
+                        "Medidas preventivas generales: <br><br>" +
+                            "<b>&#42; Inspección visual frecuente:</b> Detectar síntomas anómalos a tiempo reduce la gravedad del daño. <br><br>" +
+                            "<b>&#42; Registro fotográfico:</b> Documentar la evolución de los síntomas para facilitar el diagnóstico especializado. <br><br>" +
+                            "<b>&#42; Consultar a un agrónomo:</b> Un diagnóstico presencial o de laboratorio permite identificar con precisión el agente causal.",
+                    causes = "El agente causal específico no pudo ser identificado por el modelo. Puede ser de origen fúngico, bacteriano, viral, abiótico o por deficiencias nutricionales.",
+                    treatment =
+                        "Recomendaciones generales: <br><br>" +
+                            "<b>&#42; Muestra de laboratorio:</b> Enviar material vegetal afectado a un laboratorio fitopatológico para diagnóstico definitivo. <br><br>" +
+                            "<b>&#42; Fungicidas preventivos:</b> Aplicar cúpricos como medida provisional si se sospecha de un hongo. <br><br>" +
+                            "<b>&#42; Consulta especializada:</b> Contactar al servicio de extensión agrícola o a un ingeniero agrónomo con experiencia en paltos.",
                 ),
         )
 }

@@ -1,4 +1,11 @@
-Antracnosis
-Hoja_Saludable
-Cercospora
-No_Identificado
+Caloptilia_perseae_Avanzado
+Caloptilia_perseae_Inicial
+Caloptilia_perseae_Intermedio
+Healthy
+Oligonychus_perseae_Avanzado
+Oligonychus_perseae_Inicial
+Oligonychus_perseae_Intermedio
+Oligonychus_punicae_Avanzado
+Oligonychus_punicae_Inicial
+Oligonychus_punicae_Intermedio
+OtherDiseases
