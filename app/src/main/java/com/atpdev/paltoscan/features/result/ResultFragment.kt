@@ -106,7 +106,8 @@ class ResultFragment : Fragment() {
             binding.tvDiseaseName.text = DiseaseRepository.getDisplayName(result.diseaseName)
             val resultconfidence = result.getProbabilityString().replace("%", "").toFloat()
 
-            val isNotDetected = result.diseaseName == "No detectado" || result.diseaseName == "No reconocido" || result.diseaseName == "No identificado"
+            val isNotALeaf = result.diseaseName == "No es una hoja"
+            val isNotDetected = result.diseaseName == "No detectado" || result.diseaseName == "No reconocido" || result.diseaseName == "No identificado" || isNotALeaf
             val isInconclusive = result.diseaseName == "Diagnóstico Incierto" || result.status == com.atpdev.paltoscan.domain.model.RecognitionStatus.INCONCLUSIVE
             val isLowConfidence = result.isLowConfidence || (resultconfidence < 65f && !isNotDetected)
 
@@ -125,10 +126,11 @@ class ResultFragment : Fragment() {
                     }
             }
             binding.tvConfidence.text = if (isNotDetected) "0%" else "${resultconfidence.toInt()}%"
-            binding.btnDiseaseInfo.visibility = if (isNotDetected) View.GONE else View.VISIBLE
+            // Permitir ver info si es 'No es una hoja' para ver consejos de encuadre
+            binding.btnDiseaseInfo.visibility = if (isNotDetected && !isNotALeaf) View.GONE else View.VISIBLE
 
-            // Mostrar segunda opción si el modelo detectó otra sospecha
-            if (!result.secondDiseaseName.isNullOrBlank() && result.secondProbability > 0.05f) {
+            // Mostrar segunda opción si el modelo detectó otra sospecha (solo para hojas)
+            if (!isNotALeaf && !result.secondDiseaseName.isNullOrBlank() && result.secondProbability > 0.05f) {
                 val secondName = DiseaseRepository.getDisplayName(result.secondDiseaseName)
                 val secondPercent = (result.secondProbability * 100).toInt()
                 binding.tvSecondPrediction.text = "Segunda sospecha: $secondName ($secondPercent%)"
@@ -137,8 +139,11 @@ class ResultFragment : Fragment() {
                 binding.tvSecondPrediction.visibility = View.GONE
             }
 
-            // Mostrar advertencia si la certeza es baja o inconclusa
-            if (isInconclusive) {
+            // Mostrar advertencia si no es una hoja o si la certeza es baja
+            if (isNotALeaf) {
+                binding.tvWarning.text = "⚠️ La muestra no presenta nervaduras ni estructura foliar de palto. Asegúrate de encuadrar una hoja real."
+                binding.tvWarning.visibility = View.VISIBLE
+            } else if (isInconclusive) {
                 binding.tvWarning.text = "⚠️ Baja certeza diagnóstica. Si la hoja presenta daño o manchas, se sugiere repetir la foto con luz natural enfocando el haz (cara superior)."
                 binding.tvWarning.visibility = View.VISIBLE
             } else if (isLowConfidence) {

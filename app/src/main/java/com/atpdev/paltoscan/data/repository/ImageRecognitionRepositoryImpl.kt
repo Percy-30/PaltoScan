@@ -42,7 +42,121 @@ class ImageRecognitionRepositoryImpl
         private fun isLikelyAvocadoLeaf(bitmap: Bitmap): Boolean {
             val width = bitmap.width
             val height = bitmap.height
-            if (width < 10 || height < 10) return false
+            if (width < 20 || height < 20) return false
+
+            val startX = (width * 0.10).toInt()
+            val startY = (height * 0.10).toInt()
+            val cropW = (width * 0.80).toInt().coerceAtLeast(1)
+            val cropH = (height * 0.80).toInt().coerceAtLeast(1)
+
+            val centerCrop = Bitmap.createBitmap(bitmap, startX, startY, cropW, cropH)
+            val sampleSize = 128
+            val scaled = Bitmap.createScaledBitmap(centerCrop, sampleSize, sampleSize, true)
+
+            var foliagePixels = 0
+            val totalPixels = sampleSize * sampleSize
+            val isFoliage = BooleanArray(totalPixels)
+            val luminance = FloatArray(totalPixels)
+
+            for (y in 0 until sampleSize) {
+                for (x in 0 until sampleSize) {
+                    val idx = y * sampleSize + x
+                    val pixel = scaled.getPixel(x, y)
+                    val r = Color.red(pixel)
+                    val g = Color.green(pixel)
+                    val b = Color.blue(pixel)
+
+                    // Luminancia estándar ITU-R BT.601
+                    val lum = 0.299f * r + 0.587f * g + 0.114f * b
+                    luminance[idx] = lum
+
+                    val maxC = Math.max(r, Math.max(g, b))
+                    val minC = Math.min(r, Math.min(g, b))
+                    val chroma = maxC - minC
+
+                    // 1. Exceso de Verde (Excess Green ExG = 2G - R - B)
+                    val exG = (2 * g) - r - b
+                    val ndviVis = if (g + r > 0) (g - r).toFloat() / (g + r) else 0f
+
+                    // 2. Verde vegetal foliar real (Clorofila viva de palto):
+                    val isGreenLeaf = (exG > 18) && (g >= r * 1.20f) && (g >= b * 1.15f) && (ndviVis >= 0.09f) && (chroma > 15) && (g in 35..235)
+
+                    // 3. Tejido necrótico / daño foliar (manchas bronceadas, pardas o necróticas del palto):
+                    val isBrownLeaf = (r >= b * 1.25f) && (r >= g * 0.90f) && (chroma > 16) && (r in 40..220) && (exG in -90..12)
+
+                    if (isGreenLeaf || isBrownLeaf) {
+                        foliagePixels++
+                        isFoliage[idx] = true
+                    }
+                }
+            }
+
+            val foliageRatio = foliagePixels.toFloat() / totalPixels
+            Timber.tag("ImageRecognitionRepository").d("Foliage ratio detectado: ${foliageRatio * 100}%")
+
+            // Requisito 1: La muestra vegetal debe ocupar al menos el 20% del área central
+            if (foliageRatio < 0.20f) {
+                Timber.tag("ImageRecognitionRepository").w("Rechazado: Cobertura foliar insuficiente (${foliageRatio * 100}%)")
+                return false
+            }
+
+            // Requisito 2: Análisis de estructura foliar y venación (Gradiente Sobel)
+            // Las telas, mantas o superficies lisas tienen una textura plana sin nervaduras centrales ni secundarias.
+            // Las hojas de palto reales presentan nervaduras con bordes lineales definidos.
+            var edgeCount = 0
+            var foliageTested = 0
+            var sumLum = 0.0
+            var sumSqLum = 0.0
+
+            for (y in 1 until sampleSize - 1) {
+                for (x in 1 until sampleSize - 1) {
+                    val idx = y * sampleSize + x
+                    if (isFoliage[idx]) {
+                        foliageTested++
+                        val lum = luminance[idx].toDouble()
+                        sumLum += lum
+                        sumSqLum += lum * lum
+
+                        // Sobel horizontal (Gx) y vertical (Gy)
+                        val gx = (luminance[(y - 1) * sampleSize + (x + 1)] + 2 * luminance[y * sampleSize + (x + 1)] + luminance[(y + 1) * sampleSize + (x + 1)]) -
+                                 (luminance[(y - 1) * sampleSize + (x - 1)] + 2 * luminance[y * sampleSize + (x - 1)] + luminance[(y + 1) * sampleSize + (x - 1)])
+
+                        val gy = (luminance[(y + 1) * sampleSize + (x - 1)] + 2 * luminance[(y + 1) * sampleSize + x] + luminance[(y + 1) * sampleSize + (x + 1)]) -
+                                 (luminance[(y - 1) * sampleSize + (x - 1)] + 2 * luminance[(y - 1) * sampleSize + x] + luminance[(y - 1) * sampleSize + (x + 1)])
+
+                        val gradMagnitude = Math.abs(gx) + Math.abs(gy)
+
+                        // Gradiente significativo que indica nervadura o borde celular/foliar
+                        if (gradMagnitude > 45f) {
+                            edgeCount++
+                        }
+                    }
+                }
+            }
+
+            if (foliageTested == 0) return false
+
+            val edgeDensity = edgeCount.toFloat() / foliageTested
+            val meanLum = sumLum / foliageTested
+            val varianceLum = (sumSqLum / foliageTested) - (meanLum * meanLum)
+            val stdDevLum = Math.sqrt(Math.max(0.0, varianceLum))
+
+            Timber.tag("ImageRecognitionRepository").d("Foliage edgeDensity: ${edgeDensity * 100}%, stdDevLum: $stdDevLum")
+
+            // Una tela/manta lisa sintética o pared verde tiene muy poca variación estructural interna
+            // (edgeDensity muy baja < 0.015 o stdDevLum < 12.0)
+            if (edgeDensity < 0.015f && stdDevLum < 12.0) {
+                Timber.tag("ImageRecognitionRepository").w("Rechazado: Superficie sintética o plana sin nervaduras foliares (edgeDensity: ${edgeDensity * 100}%, stdDev: $stdDevLum)")
+                return false
+            }
+
+            return true
+        }
+
+        private fun hasAuthenticHealthyChlorophyll(bitmap: Bitmap): Boolean {
+            val width = bitmap.width
+            val height = bitmap.height
+            if (width < 20 || height < 20) return false
 
             val startX = (width * 0.15).toInt()
             val startY = (height * 0.15).toInt()
@@ -50,36 +164,33 @@ class ImageRecognitionRepositoryImpl
             val cropH = (height * 0.70).toInt().coerceAtLeast(1)
 
             val centerCrop = Bitmap.createBitmap(bitmap, startX, startY, cropW, cropH)
-            val scaled = Bitmap.createScaledBitmap(centerCrop, 64, 64, true)
+            val sampleSize = 64
+            val scaled = Bitmap.createScaledBitmap(centerCrop, sampleSize, sampleSize, true)
 
-            var foliagePixels = 0
-            val totalPixels = 64 * 64
+            var chlorophyllPixels = 0
+            val totalPixels = sampleSize * sampleSize
 
-            for (y in 0 until 64) {
-                for (x in 0 until 64) {
+            for (y in 0 until sampleSize) {
+                for (x in 0 until sampleSize) {
                     val pixel = scaled.getPixel(x, y)
                     val r = Color.red(pixel)
                     val g = Color.green(pixel)
                     val b = Color.blue(pixel)
 
-                    val maxC = Math.max(r, Math.max(g, b))
-                    val minC = Math.min(r, Math.min(g, b))
-                    val chroma = maxC - minC
+                    val exG = (2 * g) - r - b
+                    val ndviVis = if (g + r > 0) (g - r).toFloat() / (g + r) else 0f
 
-                    // 1. Verde vegetal foliar: verde superior a azul y rojo con saturación
-                    val isGreen = (g >= r * 0.90f) && (g >= b * 1.10f) && (chroma > 14) && (g > 35)
-                    // 2. Tejido necrótico / daño foliar (manchas bronceadas o pardas características del palto):
-                    val isBrownLeaf = (r >= b * 1.20f) && (g >= b * 1.05f) && (chroma > 18) && (maxC < 225) && (r > 40)
-
-                    if (isGreen || isBrownLeaf) {
-                        foliagePixels++
+                    // Clorofila auténtica de hoja sana de palto (Persea americana):
+                    // El verde vivo supera al rojo en al menos 22% y al azul en 18%
+                    if (g >= r * 1.22f && g >= b * 1.18f && exG > 22 && ndviVis >= 0.10f && g in 35..240) {
+                        chlorophyllPixels++
                     }
                 }
             }
 
-            val foliageRatio = foliagePixels.toFloat() / totalPixels
-            Timber.tag("ImageRecognitionRepository").d("Foliage ratio detectado: ${foliageRatio * 100}%")
-            return foliageRatio >= 0.10f // Al menos 10% de características foliares en el centro
+            val ratio = chlorophyllPixels.toFloat() / totalPixels
+            Timber.tag("ImageRecognitionRepository").d("Chlorophyll ratio para Healthy: ${ratio * 100}%")
+            return ratio >= 0.25f // Una hoja sana real debe tener al menos 25% de clorofila viva en el centro
         }
 
         override suspend fun getRecognitionResult(bitmap: Bitmap): RecognitionResult {
@@ -89,7 +200,7 @@ class ImageRecognitionRepositoryImpl
                     if (!isLikelyAvocadoLeaf(bitmap)) {
                         Timber.tag("ImageRecognitionRepository").w("La muestra no parece ser una hoja de palto")
                         return@withContext RecognitionResult(
-                            "No detectado",
+                            "No es una hoja",
                             0.0f,
                             status = com.atpdev.paltoscan.domain.model.RecognitionStatus.INCONCLUSIVE,
                         )
@@ -141,6 +252,18 @@ class ImageRecognitionRepositoryImpl
                             secondProbability = secondProb,
                             isLowConfidence = true,
                         ).apply { heatmapBitmap = classificationResult.heatmap }
+                    }
+
+                    // Validación cruzada para "Healthy":
+                    // Si el modelo predijo "Healthy" (incluso con 90%+), exigimos que contenga clorofila de hoja sana real.
+                    // Si es una manta polar verde, tela, ropa o pared, se descarta como "No es una hoja".
+                    if (diseaseName == "Healthy" && !hasAuthenticHealthyChlorophyll(bitmap)) {
+                        Timber.tag("ImageRecognitionRepository").w("Rechazo cruzado: Red predijo Healthy pero no posee clorofila auténtica de palto")
+                        return@withContext RecognitionResult(
+                            diseaseName = "No es una hoja",
+                            probability = 0.0f,
+                            status = com.atpdev.paltoscan.domain.model.RecognitionStatus.INCONCLUSIVE,
+                        )
                     }
 
                     Timber.tag("ImageRecognitionRepository").d("Probabilidad: $maxProbability, Resultado final: $diseaseName, Segunda opción: $secondDisease ($secondProb)")

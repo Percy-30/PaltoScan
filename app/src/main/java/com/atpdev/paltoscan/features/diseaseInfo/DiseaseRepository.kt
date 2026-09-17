@@ -225,6 +225,21 @@ object DiseaseRepository {
             treatment = "Tomar una nueva fotografía enfocando de cerca la zona afectada siguiendo las pautas de captura óptima.",
         )
 
+    private val infoNotALeaf =
+        DiseaseInfo(
+            name = "No es una hoja",
+            description =
+                "El análisis visual no detectó las características anatómicas ni las nervaduras típicas de una hoja de palto (<i>Persea americana</i>). " +
+                    "La imagen parece corresponder a un objeto no vegetal (tela, ropa, muebles, pared, piso u otro fondo).",
+            prevention =
+                "Pautas para un escaneo correcto: <br><br>" +
+                    "<b>&#42; Enfoque directo:</b> Encuadrar una hoja real de palto en el centro de la pantalla. <br><br>" +
+                    "<b>&#42; Distancia adecuada:</b> Mantener la cámara a 15–25 cm de la hoja para que las nervaduras sean visibles. <br><br>" +
+                    "<b>&#42; Fondo neutro:</b> Colocar la hoja sobre una superficie plana sin texturas llamativas ni telas.",
+            causes = "Captura de un objeto no vegetal, tejido sintético o encuadre fuera de la hoja.",
+            treatment = "Apuntar la cámara hacia una hoja de palto y repetir la captura.",
+        )
+
     // ──────────────────────────────────────────────────────────────────────────
     // Base de datos de enfermedades — Mapeo completo (Inglés + Español + Latín)
     // ──────────────────────────────────────────────────────────────────────────
@@ -247,6 +262,7 @@ object DiseaseRepository {
             "OtherDisease" to infoOtherDisease,
             "OtherDiseases" to infoOtherDisease,
             "Diagnóstico Incierto" to infoInconclusive,
+            "No es una hoja" to infoNotALeaf,
 
             // ─── NOMBRES COMPLETOS EN ESPAÑOL ─────────────────────────────────
             infoCrystalMiteEarly.name to infoCrystalMiteEarly,
@@ -264,6 +280,7 @@ object DiseaseRepository {
             infoHealthy.name to infoHealthy,
             infoOtherDisease.name to infoOtherDisease,
             infoInconclusive.name to infoInconclusive,
+            infoNotALeaf.name to infoNotALeaf,
 
             // ─── ALIASES EN LATÍN / ALTERNATIVOS ──────────────────────────────
             "Caloptilia_perseae_Inicial" to infoLeafMinerEarly,
@@ -285,7 +302,7 @@ object DiseaseRepository {
      */
     fun getDisplayName(key: String?): String {
         if (key.isNullOrBlank()) return "No identificado"
-        if (key == "No detectado" || key == "No reconocido" || key == "Desconocido" || key == "Error") return key
+        if (key == "No detectado" || key == "No reconocido" || key == "Desconocido" || key == "Error" || key == "Diagnóstico Incierto" || key == "No es una hoja") return key
         return diseaseDatabase[key]?.name ?: key
     }
 }
