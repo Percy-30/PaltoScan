@@ -179,7 +179,7 @@ class DiseaseDetailFragment : Fragment() {
 
             val history =
                 History(
-                    diseaseName = diseaseName,
+                    diseaseName = diseaseInfo.name,
                     section = "PaltoScan",
                     description = diseaseInfo.description,
                     prevention = diseaseInfo.prevention,

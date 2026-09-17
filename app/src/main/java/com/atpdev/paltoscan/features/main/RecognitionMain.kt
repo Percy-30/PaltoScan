@@ -73,11 +73,15 @@ class RecognitionMain : Fragment() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
+            binding.txtWeatherStatus.text = "Cargando clima..."
+            binding.txtWeatherDetails.text = "Obteniendo datos de riesgo..."
             checkAndPromptLocation()
             viewModel.fetchWeatherRisk()
         } else {
             binding.txtWeatherStatus.text = "Clima no disponible"
-            binding.txtWeatherDetails.text = "Se requiere permiso de ubicación."
+            binding.txtWeatherDetails.text = "Se requiere permiso de ubicación. Toca aquí para activarlo."
+            binding.txtWeatherStatus.setTextColor(android.graphics.Color.GRAY)
+            binding.imgWeatherIcon.setColorFilter(android.graphics.Color.GRAY)
         }
     }
 
@@ -125,13 +129,17 @@ class RecognitionMain : Fragment() {
     }
 
     private fun setupWeatherWidget() {
+        binding.cardWeather.setOnClickListener {
+            handleWeatherClick()
+        }
+
         viewModel.weatherRisk.observe(viewLifecycleOwner) { riskData ->
             val isRisk = riskData.first
             val message = riskData.second
 
             if (isRisk == null) {
                 // Error o Offline
-                binding.txtWeatherStatus.text = "Clima No Disponible"
+                binding.txtWeatherStatus.text = "Clima no disponible"
                 binding.txtWeatherStatus.setTextColor(android.graphics.Color.GRAY)
                 binding.imgWeatherIcon.setColorFilter(android.graphics.Color.GRAY)
             } else if (isRisk == true) {
@@ -151,6 +159,10 @@ class RecognitionMain : Fragment() {
             checkAndPromptLocation()
             viewModel.fetchWeatherRisk()
         } else {
+            binding.txtWeatherStatus.text = "Clima no disponible"
+            binding.txtWeatherDetails.text = "Se requiere permiso de ubicación. Toca aquí para activarlo."
+            binding.txtWeatherStatus.setTextColor(android.graphics.Color.GRAY)
+            binding.imgWeatherIcon.setColorFilter(android.graphics.Color.GRAY)
             locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
         }
     }
@@ -247,6 +259,106 @@ class RecognitionMain : Fragment() {
             negativeButtonBackgroundColor = R.color.colorOrangeSoft,
             negativeButtonTextColor = R.color.black,
         ).show(parentFragmentManager, "GoToSettingsDialog")
+    }
+
+    private fun handleWeatherClick() {
+        val hasLocationPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        if (!hasLocationPermission) {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                showLocationRationaleDialog()
+            } else {
+                showGoToLocationSettingsDialog()
+            }
+            return
+        }
+
+        val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as LocationManager
+        if (!LocationManagerCompat.isLocationEnabled(locationManager)) {
+            checkAndPromptLocation()
+            return
+        }
+
+        val currentRisk = viewModel.weatherRisk.value
+        if (currentRisk == null || currentRisk.first == null) {
+            binding.txtWeatherStatus.text = "Actualizando clima..."
+            binding.txtWeatherDetails.text = "Consultando pronóstico agroclimático..."
+            viewModel.fetchWeatherRisk()
+            showToastWarning("Actualizando información del clima...")
+        } else {
+            showWeatherDetailsDialog(currentRisk.first, currentRisk.second)
+        }
+    }
+
+    private fun showLocationRationaleDialog() {
+        FragmentAlertDialogExit.newInstance(
+            title = "Permiso de ubicación necesario",
+            message = "Palto Scan necesita acceso a la ubicación aproximada para obtener la temperatura y humedad en tiempo real de tu cultivo y evaluar riesgos de plagas o enfermedades.",
+            positiveText = "Conceder",
+            negativeText = "Cancelar",
+            onPositive = {
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            },
+            onNegative = {
+                showToastWarning("Se requiere permiso de ubicación para consultar el clima local")
+            },
+            iconResId = R.drawable.ic_advertencia,
+        ).show(parentFragmentManager, "LocationRationaleDialog")
+    }
+
+    private fun showGoToLocationSettingsDialog() {
+        FragmentAlertDialogExit.newInstance(
+            title = "Permiso de ubicación requerido",
+            message = "El permiso de ubicación está desactivado. Para obtener el pronóstico climático y alertas de tu cultivo, activa el permiso en los Ajustes de la aplicación.",
+            positiveText = "Ir a Ajustes",
+            negativeText = "Reintentar",
+            onPositive = {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", requireContext().packageName, null)
+                }
+                startActivity(intent)
+            },
+            onNegative = {
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            },
+            iconResId = R.drawable.ic_bar_info,
+            positiveButtonBackgroundColor = R.color.colorTeal,
+            positiveButtonTextColor = R.color.black,
+            negativeButtonBackgroundColor = R.color.colorOrangeSoft,
+            negativeButtonTextColor = R.color.black,
+        ).show(parentFragmentManager, "GoToLocationSettingsDialog")
+    }
+
+    private fun showWeatherDetailsDialog(isRisk: Boolean?, message: String) {
+        val title = if (isRisk == true) "Alerta de Riesgo Climático" else "Condiciones Favorables"
+        val icon = if (isRisk == true) R.drawable.ic_advertencia else R.drawable.ic_bar_info
+        val advisory = if (isRisk == true) {
+            "Recomendación: El clima presenta condiciones propicias para el desarrollo de enfermedades foliares (ej. Rancha). Monitorea tus árboles y considera medidas preventivas."
+        } else {
+            "Recomendación: Las condiciones agroclimáticas actuales son óptimas y seguras para el cultivo de palto."
+        }
+
+        FragmentAlertDialogExit.newInstance(
+            title = title,
+            message = "$message\n\n$advisory\n\n¿Deseas volver a actualizar el pronóstico meteorológico ahora?",
+            positiveText = "Actualizar",
+            negativeText = "Cerrar",
+            onPositive = {
+                binding.txtWeatherStatus.text = "Actualizando clima..."
+                binding.txtWeatherDetails.text = "Consultando condiciones meteorológicas..."
+                viewModel.fetchWeatherRisk()
+                showToastWarning("Actualizando clima...")
+            },
+            onNegative = {},
+            iconResId = icon,
+            positiveButtonBackgroundColor = R.color.colorTeal,
+            positiveButtonTextColor = R.color.black,
+            negativeButtonBackgroundColor = R.color.colorOrangeSoft,
+            negativeButtonTextColor = R.color.black,
+        ).show(parentFragmentManager, "WeatherDetailsDialog")
     }
 
     /*private fun showPermissionRationaleDialog() {

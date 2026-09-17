@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.atpdev.paltoscan.R
 import com.atpdev.paltoscan.databinding.ItemHistoryCardBinding
+import com.atpdev.paltoscan.features.diseaseInfo.DiseaseRepository
 import com.atpdev.paltoscan.features.history.HistoryItemDiffCallback
 import io.github.muddz.styleabletoast.StyleableToast
 import java.text.SimpleDateFormat
@@ -114,7 +115,7 @@ class HistoryAdapter(
                 val bitmap = BitmapFactory.decodeFile(item.imagePath)
                 binding.imageViewDisease.setImageBitmap(bitmap) // Asegúrate de que este ImageView exista
 
-                textViewName.text = item.diseaseName
+                textViewName.text = DiseaseRepository.getDisplayName(item.diseaseName)
                 textViewSection.text = item.section
                 // textViewSection.text = if (item.section == "main") "PaltoScan" else item.section
 

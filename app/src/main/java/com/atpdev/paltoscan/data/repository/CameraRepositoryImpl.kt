@@ -97,16 +97,17 @@ class CameraRepositoryImpl(
             }
 
         val fileName =
-            "PREVIEW_" +
+            "PALTOSCAN_" +
                 SimpleDateFormat(
-                    "yyyy-MM-dd-HH-mm-ss-SSS",
+                    "yyyyMMdd_HHmmss_SSS",
                     Locale.US,
                 ).format(System.currentTimeMillis()) + ".jpg"
 
         val contentValues =
             ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraApp/Preview")
+                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/PaltoScan")
             }
 
         val outputOptions =

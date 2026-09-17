@@ -45,30 +45,57 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <com.mikhaellopez.circularprogressbar.CircularProgressBar
-                android:id="@+id/progresoCircular"
+            <FrameLayout
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="16dp"
-                app:cpb_progress="0"
-                app:cpb_progress_max="100"
-                app:cpb_progressbar_width="15dp"
-                app:cpb_background_progressbar_width="15dp"
-                app:cpb_progressbar_color="#4CAF50"
-                app:cpb_background_progressbar_color="#E0E0E0"
-                app:cpb_round_border="true"
-                app:cpb_start_angle="270" />
+                android:layout_marginTop="16dp">
+
+                <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                    android:id="@+id/progresoCircular"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cpb_progress="0"
+                    app:cpb_progress_max="100"
+                    app:cpb_progressbar_width="15dp"
+                    app:cpb_background_progressbar_width="15dp"
+                    app:cpb_progressbar_color="#4CAF50"
+                    app:cpb_background_progressbar_color="#E0E0E0"
+                    app:cpb_round_border="true"
+                    app:cpb_start_angle="270" />
+
+                <TextView
+                    android:id="@+id/tvConfidence"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="0%"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
 
             <TextView
-                android:id="@+id/tvConfidence"
+                android:id="@+id/tvSecondPrediction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0%"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_gravity="center"
-                android:layout_marginTop="-92dp"/>
+                android:layout_marginTop="12dp"
+                android:textSize="14sp"
+                android:textColor="#555555"
+                android:visibility="gone"
+                tools:text="Segunda opción: Ácaro Rojo (38%)" />
+
+            <TextView
+                android:id="@+id/tvWarning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="#E65100"
+                android:visibility="gone"
+                tools:text="⚠️ Diagnóstico con baja certeza. Si la hoja muestra daño, se sugiere repetir la foto con mejor iluminación." />
 
             <!-- Botón con Lottie Animation SAVE-->
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -77,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/green_button_background"
                 android:clickable="true"
-                android:layout_marginTop="132dp"
+                android:layout_marginTop="20dp"
                 android:focusable="true"
                 android:minHeight="48dp"
                 app:layout_constraintBottom_toBottomOf="parent"

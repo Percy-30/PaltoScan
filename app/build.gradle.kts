@@ -18,8 +18,8 @@ android {
         applicationId = "com.atpdev.paltoscan"
         minSdk = 24
         targetSdk = 36
-        versionCode = 10
-        versionName = "1.9"
+        versionCode = 1
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["android.nativeHeapPointerTagging"] = "false"

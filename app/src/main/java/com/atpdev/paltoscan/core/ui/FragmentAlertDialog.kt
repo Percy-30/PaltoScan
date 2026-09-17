@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import com.atpdev.paltoscan.R
 import com.atpdev.paltoscan.databinding.FragmentAlertDialogBinding
 
 class FragmentAlertDialog : DialogFragment() {
@@ -30,7 +31,7 @@ class FragmentAlertDialog : DialogFragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
         val version = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName
-        binding.infoVersion.text = "Version $version"
+        binding.infoVersion.text = getString(R.string.version_label, version)
 
         binding.tvPrivacyPolicy.setOnClickListener {
             val url = "https://sites.google.com/view/privacypolicy-paltoscan/inicio" // Coloca aquí el enlace real

@@ -210,6 +210,21 @@ object DiseaseRepository {
                     "<b>&#42; Eliminación de material enfermo:</b> Recoger hojas y ramas caídas para evitar la dispersión de esporas.",
         )
 
+    private val infoInconclusive =
+        DiseaseInfo(
+            name = "Diagnóstico Incierto",
+            description =
+                "El análisis visual no alcanzó el nivel mínimo de certeza necesario (65%). " +
+                    "Esto ocurre habitualmente cuando la hoja presenta síntomas ambiguos, sombras o reflejos excesivos, necrosis avanzada difícil de atribuir a un único agente, o cuando la fotografía fue tomada por el envés (cara inferior) en lugar del haz.",
+            prevention =
+                "Consejos para una captura óptima: <br><br>" +
+                    "<b>&#42; Cara de la hoja:</b> Fotografiar preferentemente el <b>haz</b> (la cara superior expuesta al sol). <br><br>" +
+                    "<b>&#42; Iluminación uniforme:</b> Usar luz natural difusa y evitar proyectar sombras directas del teléfono sobre la hoja. <br><br>" +
+                    "<b>&#42; Fondo neutro:</b> Colocar la hoja sobre una superficie plana y sin reflejos.",
+            causes = "Certeza estadística insuficiente del modelo de visión artificial o condiciones complejas en la toma.",
+            treatment = "Tomar una nueva fotografía enfocando de cerca la zona afectada siguiendo las pautas de captura óptima.",
+        )
+
     // ──────────────────────────────────────────────────────────────────────────
     // Base de datos de enfermedades — Mapeo completo (Inglés + Español + Latín)
     // ──────────────────────────────────────────────────────────────────────────
@@ -231,6 +246,24 @@ object DiseaseRepository {
             "Healthy" to infoHealthy,
             "OtherDisease" to infoOtherDisease,
             "OtherDiseases" to infoOtherDisease,
+            "Diagnóstico Incierto" to infoInconclusive,
+
+            // ─── NOMBRES COMPLETOS EN ESPAÑOL ─────────────────────────────────
+            infoCrystalMiteEarly.name to infoCrystalMiteEarly,
+            infoCrystalMiteIntermediate.name to infoCrystalMiteIntermediate,
+            infoCrystalMiteAdvanced.name to infoCrystalMiteAdvanced,
+
+            infoLeafMinerEarly.name to infoLeafMinerEarly,
+            infoLeafMinerIntermediate.name to infoLeafMinerIntermediate,
+            infoLeafMinerAdvanced.name to infoLeafMinerAdvanced,
+
+            infoRedMiteEarly.name to infoRedMiteEarly,
+            infoRedMiteIntermediate.name to infoRedMiteIntermediate,
+            infoRedMiteAdvanced.name to infoRedMiteAdvanced,
+
+            infoHealthy.name to infoHealthy,
+            infoOtherDisease.name to infoOtherDisease,
+            infoInconclusive.name to infoInconclusive,
 
             // ─── ALIASES EN LATÍN / ALTERNATIVOS ──────────────────────────────
             "Caloptilia_perseae_Inicial" to infoLeafMinerEarly,
@@ -245,4 +278,14 @@ object DiseaseRepository {
             "Oligonychus_punicae_Intermedio" to infoRedMiteIntermediate,
             "Oligonychus_punicae_Avanzado" to infoRedMiteAdvanced,
         )
+
+    /**
+     * Retorna el nombre legible y en español de la enfermedad para la interfaz de usuario.
+     * Si no se encuentra en la base de datos, retorna el valor original.
+     */
+    fun getDisplayName(key: String?): String {
+        if (key.isNullOrBlank()) return "No identificado"
+        if (key == "No detectado" || key == "No reconocido" || key == "Desconocido" || key == "Error") return key
+        return diseaseDatabase[key]?.name ?: key
+    }
 }

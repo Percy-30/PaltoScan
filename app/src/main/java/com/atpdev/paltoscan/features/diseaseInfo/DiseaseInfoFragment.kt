@@ -92,7 +92,7 @@ class DiseaseInfoFragment : Fragment() {
         Timber.tag("DiseaseInfoFragment").d("🔍 DEBUG - Arguments: ${arguments?.keySet()}")
 
         binding.apply {
-            textDiseaseTitle.text = diseaseName
+            textDiseaseTitle.text = DiseaseRepository.getDisplayName(diseaseName)
             // bitmap?.let { imageDisease.setImageBitmap(it) }
 
             viewPager.adapter = DiseaseInfoPagerAdapter(this@DiseaseInfoFragment, diseaseName, fromHistory)
@@ -127,7 +127,7 @@ class DiseaseInfoFragment : Fragment() {
                 val section = historyItem.section
                 val image = historyItem.imagePath
 
-                diseaseInfo?.let { binding.textDiseaseTitle.text = it }
+                diseaseInfo?.let { binding.textDiseaseTitle.text = DiseaseRepository.getDisplayName(it) }
 
                 image?.let {
                     val file = File(it)

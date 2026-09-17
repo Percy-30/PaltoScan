@@ -136,6 +136,11 @@ class RecognitionFragment : Fragment() {
         EnabledRetroceso()
     }
 
+    override fun onResume() {
+        super.onResume()
+        isProcessing = false
+    }
+
     private fun EnabledRetroceso() {
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
@@ -265,6 +270,11 @@ class RecognitionFragment : Fragment() {
         bitmap: Bitmap,
     ) {
         Timber.tag("RecognitionFragment").d("Navegando a ResultFragment")
+        isProcessing = false
+        _binding?.progressBarlottieAnimationView?.apply {
+            cancelAnimation()
+            visibility = View.GONE
+        }
         // Haptic Feedback de éxito
         com.atpdev.paltoscan.core.utils.HapticHelper.vibrateSuccess(requireContext())
         // Pasar el heatmap al sharedViewModel
@@ -330,22 +340,12 @@ class RecognitionFragment : Fragment() {
             }
 
             imgPhotoPreview.setOnClickListener {
-                if (cargeImage) {
-                    showToastProccessImagevalidation("Ya se cargo la imagen ahora debe procesar.... O Tomar otra foto")
-                    // CloseMenuFlotant()
-                    // binding.imgPhotoPreview.setImageBitmap(null)
-                    // cargeImage = false
+                if (!cameraRepository.isCameraPermissionGranted()) {
+                    viewModel.setOpenCameraAfterPermission(true)
+                    requestCameraPermission()
                 } else {
-                    if (!cameraRepository.isCameraPermissionGranted()) {
-                        viewModel.setOpenCameraAfterPermission(true)
-                        requestCameraPermission()
-                    } else {
-                        showToast("Tomar foto")
-                        navigateToCameraFragment()
-                       /*viewModel.btnOpenCamera()
-                       showToast("Tomar foto")
-                       navigateToCameraFragment()*/
-                    }
+                    showToast("Tomar foto")
+                    navigateToCameraFragment()
                 }
             }
         }
@@ -394,32 +394,26 @@ class RecognitionFragment : Fragment() {
     private fun BotonProcesar() {
         binding.btnProcessImage.setOnClickListener {
             _binding ?: return@setOnClickListener
-
             if (cargeImage) {
-                // Iniciar animación en bucle infinito
-                showRandomAnimation(loop = true) // <-- Ahora se repite
-                lifecycleScope.launch {
-                    delay(3000) // Espera 3 segundos
-                    try {
-                        // ProcesarImagen()
-                        // ⏱️ Medir inicio
-                        val startTime = System.currentTimeMillis()
+                iniciarProcesamientoAutomatico()
+            }
+        }
+    }
 
-                        ProcesarImagen() // tu función que procesa la imagen
-
-                        // ⏱️ Medir fin
-                        val endTime = System.currentTimeMillis()
-                        val elapsedTime = endTime - startTime // en ms
-
-                        // Mostrar en Log
-                        Timber.tag("Performance").d("Velocidad de reconocimiento: $elapsedTime ms")
-
-                        // Mostrar en Toast
-                        // Toast.makeText(requireContext(), "Reconocimiento en $elapsedTime ms", Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
-                        Timber.tag("Process").e(e, "Error")
-                    }
-                }
+    private fun iniciarProcesamientoAutomatico() {
+        if (!cargeImage || isProcessing) return
+        isProcessing = true
+        showRandomAnimation(loop = true)
+        lifecycleScope.launch {
+            delay(500) // Transición visual fluida para la animación de escaneo
+            try {
+                val startTime = System.currentTimeMillis()
+                ProcesarImagen()
+                val elapsedTime = System.currentTimeMillis() - startTime
+                Timber.tag("Performance").d("Velocidad de reconocimiento: $elapsedTime ms")
+            } catch (e: Exception) {
+                Timber.tag("Process").e(e, "Error al procesar automáticamente")
+                isProcessing = false
             }
         }
     }
@@ -633,10 +627,8 @@ class RecognitionFragment : Fragment() {
         findNavController().navigate(R.id.action_recognitionFragment_to_fragmentCamera)
     }
 
-    // Mostrar resultrando tayedo de otro activity
     private fun observeNavigationResult() {
-        // Observar el resultado de la navega
-        // ción desde FragmentCamera
+        // Observar el resultado de la navegación desde FragmentCamera
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>("image_uri")?.observe(
             viewLifecycleOwner,
         ) { uri ->
@@ -644,12 +636,13 @@ class RecognitionFragment : Fragment() {
                 // Mostrar la imagen capturada
                 binding.imgPhotoPreview.setImageURI(Uri.parse(it))
                 binding.imgPhotoPreview.visibility = View.VISIBLE
-                handleImageState(true) // <-- Aquí actualizamos el estado
-                // cargeImage = true
-                // Toast.makeText(requireContext(), "Imagen cargada de la camara", Toast.LENGTH_SHORT).show()
-                showToastCorrect("Imagen cargada con éxito")
+                handleImageState(true)
+                showToastCorrect("Imagen capturada con éxito")
                 // Limpiar el savedStateHandle para evitar mostrar la misma imagen múltiples veces
                 findNavController().currentBackStackEntry?.savedStateHandle?.remove<String>("image_uri")
+                findNavController().currentBackStackEntry?.savedStateHandle?.remove<Boolean>("auto_process")
+                // ¡PROCESAMIENTO AUTOMÁTICO INMEDIATO!
+                iniciarProcesamientoAutomatico()
             }
         }
     }
@@ -738,27 +731,25 @@ class RecognitionFragment : Fragment() {
                 setImageURI(it)
                 visibility = View.VISIBLE
                 CloseMenuFlotant()
-                // cargeImage = true
-                handleImageState(true) // <-- Aquí actualizamos el estado
+                handleImageState(true)
             }
             showToastCorrect("Imagen cargada con éxito")
+            iniciarProcesamientoAutomatico()
         } ?: showToastError("No se pudo cargar la imagen")
     }
 
-    // Maneja   Selección de imágenes (Android 11+)
+    // Maneja Selección de imágenes (Android 11+)
     private val selectImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 // Cargar la imagen con escalado antes de asignarla al ImageView
                 loadImageEfficiently(it)
                 CloseMenuFlotant()
-                // cargeImage = true
-                handleImageState(true) // <-- Aquí actualizamos el estad
+                handleImageState(true)
                 showToastCorrect("Imagen cargada con éxito")
-                // Toast.makeText(requireContext(), "Imagen cargada con éxito", Toast.LENGTH_SHORT).show()
+                iniciarProcesamientoAutomatico()
             } ?: run {
-                handleImageState(false) // <-- Aquí actualizamos el estad
-                // Toast.makeText(requireContext(), "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show()
+                handleImageState(false)
                 showToastError("No se pudo cargar la imagen")
             }
         }

@@ -31,9 +31,14 @@ import com.atpdev.paltoscan.core.ui.FragmentAlertDialog
 import com.atpdev.paltoscan.core.ui.FragmentAlertDialogExit
 import com.atpdev.paltoscan.features.recognition.RecognitionViewModel
 import com.atpdev.paltoscan.core.utils.sharePaltoScanApp
+import android.graphics.Bitmap
+import android.graphics.Color
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.muddz.styleabletoast.StyleableToast
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ExecutorService
@@ -52,6 +57,10 @@ class FragmentCamera : Fragment() {
     private var isCleaningUp = false
     private var camera: Camera? = null
     private var isImageCaptured = false
+    private var isCapturing = false
+    private var leafDetectionJob: Job? = null
+    private var consecutiveLeafDetections = 0
+    private val REQUIRED_CONSECUTIVE_DETECTIONS = 4 // ~1 segundo de estabilidad (4 x 250ms)
     private val viewModel: RecognitionViewModel by viewModels()
 
     private lateinit var menuHandler: MenuToolbar
@@ -213,45 +222,134 @@ class FragmentCamera : Fragment() {
 
     private fun setupUI() {
         with(binding) {
-            // Inicialmente, mostrar solo la vista previa y el botón de captura
             cameraPreview.visibility = View.VISIBLE
             btnTakePhoto.visibility = View.VISIBLE
             imagePreview.visibility = View.GONE
-
-            // Asegurarse de que la guía sea visible cuando la cámara está activa
             overlayGuide.visibility = View.VISIBLE
+            linearEdit.visibility = View.GONE
 
-            btnSaveCancelGone()
             btnTakePhoto.setOnClickListener { captureImage() }
-            btnSavePhoto.setOnClickListener { saveImage() }
-            btnCancelPhoto.setOnClickListener { retakePhoto() }
-        }
-    }
-
-    private fun btnSaveCancelGone() {
-        with(binding) {
-            btnSavePhoto.visibility = View.GONE
-            btnCancelPhoto.visibility = View.GONE
-        }
-    }
-
-    private fun btnSaveCancelVisibible() {
-        with(binding) {
-            btnSavePhoto.visibility = View.VISIBLE
-            btnCancelPhoto.visibility = View.VISIBLE
         }
     }
 
     private fun startCamera() {
         cameraRepository.startCamera(binding.cameraPreview, viewLifecycleOwner)
+        startLeafDetection()
+    }
+
+    private fun startLeafDetection() {
+        leafDetectionJob?.cancel()
+        leafDetectionJob = viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                while (isActive) {
+                    delay(250)
+                    if (isCapturing) continue
+
+                    val previewView = _binding?.cameraPreview ?: continue
+                    val bitmap = withContext(Dispatchers.Main) {
+                        try {
+                            previewView.bitmap
+                        } catch (e: Exception) {
+                            null
+                        }
+                    } ?: continue
+
+                    val hasLeaf = checkLeafInGuide(bitmap)
+
+                    withContext(Dispatchers.Main) {
+                        if (_binding == null || isCapturing) return@withContext
+
+                        if (hasLeaf) {
+                            consecutiveLeafDetections++
+                            // Teñir silueta guía en verde esmeralda para indicar detección exitosa
+                            binding.overlayGuide.setColorFilter(Color.parseColor("#4CAF50"))
+
+                            if (consecutiveLeafDetections >= REQUIRED_CONSECUTIVE_DETECTIONS) {
+                                consecutiveLeafDetections = 0
+                                Timber.tag("FragmentCamera").d("¡Hoja detectada de forma estable! Disparo automático iniciado")
+                                captureImage()
+                            }
+                        } else {
+                            consecutiveLeafDetections = 0
+                            // Restablecer color blanco original de la silueta
+                            binding.overlayGuide.clearColorFilter()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun checkLeafInGuide(bitmap: Bitmap): Boolean {
+        val width = bitmap.width
+        val height = bitmap.height
+        if (width < 20 || height < 20) return false
+
+        val startX = (width * 0.22).toInt()
+        val startY = (height * 0.20).toInt()
+        val cropW = (width * 0.56).toInt().coerceAtLeast(1)
+        val cropH = (height * 0.60).toInt().coerceAtLeast(1)
+
+        val centerCrop = Bitmap.createBitmap(bitmap, startX, startY, cropW, cropH)
+        val scaled = Bitmap.createScaledBitmap(centerCrop, 48, 48, false)
+        if (centerCrop != bitmap) {
+            centerCrop.recycle()
+        }
+
+        var foliagePixels = 0
+        val totalPixels = 48 * 48
+
+        for (y in 0 until 48) {
+            for (x in 0 until 48) {
+                val pixel = scaled.getPixel(x, y)
+                val r = Color.red(pixel)
+                val g = Color.green(pixel)
+                val b = Color.blue(pixel)
+
+                val maxC = Math.max(r, Math.max(g, b))
+                val minC = Math.min(r, Math.min(g, b))
+                val chroma = maxC - minC
+
+                val isGreen = (g >= r * 0.90f) && (g >= b * 1.10f) && (chroma > 14) && (g > 35)
+                val isBrownLeaf = (r >= b * 1.20f) && (g >= b * 1.05f) && (chroma > 18) && (maxC < 225) && (r > 40)
+
+                if (isGreen || isBrownLeaf) {
+                    foliagePixels++
+                }
+            }
+        }
+        scaled.recycle()
+
+        val foliageRatio = foliagePixels.toFloat() / totalPixels
+        return foliageRatio >= 0.25f
     }
 
     private fun captureImage() {
+        if (isCapturing) return
+        isCapturing = true
+
+        try {
+            com.atpdev.paltoscan.core.utils.HapticHelper.vibrateSuccess(requireContext())
+        } catch (e: Exception) {
+            Timber.tag("Camera").e(e, "Error al activar feedback háptico")
+        }
+
         cameraRepository.captureImage(
             onImageCaptured = { uri ->
-                showPreview(uri)
+                lifecycleScope.launch(Dispatchers.Main) {
+                    try {
+                        leafDetectionJob?.cancel()
+                        findNavController().previousBackStackEntry?.savedStateHandle?.set("image_uri", uri.toString())
+                        findNavController().previousBackStackEntry?.savedStateHandle?.set("auto_process", true)
+                        findNavController().popBackStack()
+                    } catch (e: Exception) {
+                        Timber.tag("FragmentCamera").e(e, "Error al regresar de cámara")
+                        isCapturing = false
+                    }
+                }
             },
             onError = { error ->
+                isCapturing = false
                 showError(error)
             },
         )
@@ -259,50 +357,6 @@ class FragmentCamera : Fragment() {
 
     private fun showToastError(message: String) {
         StyleableToast.makeText(requireContext(), message, R.style.exampleToastError).show()
-    }
-
-    private fun saveImage() {
-        // binding.lottieAnimationView.playAnimation()
-        cameraRepository.saveImage(
-            onImageSaved = { uri ->
-                // Navegar de vuelta con el URI de la imagen
-                findNavController().previousBackStackEntry?.savedStateHandle?.set("image_uri", uri.toString())
-                findNavController().popBackStack()
-            },
-            onError = { error ->
-                showError(error)
-            },
-        )
-    }
-
-    private fun showPreview(uri: Uri) {
-        with(binding) {
-            // Ocultar la vista previa de la cámara y mostrar la imagen capturada
-            cameraPreview.visibility = View.GONE
-            imagePreview.visibility = View.VISIBLE
-            overlayGuide.visibility = View.GONE // Ocultar la guía cuando se muestra la preview
-            imagePreview.setImageURI(uri)
-
-            // Cambiar los botones visibles
-            btnTakePhoto.visibility = View.GONE
-            btnSaveCancelVisibible()
-        }
-        isImageCaptured = true
-    }
-
-    private fun retakePhoto() {
-        with(binding) {
-            // Volver a mostrar la vista previa de la cámara
-            cameraPreview.visibility = View.VISIBLE
-            imagePreview.visibility = View.GONE
-            overlayGuide.visibility = View.VISIBLE // Mostrar la guía nuevamente
-
-            // Restaurar los botones originales
-            btnTakePhoto.visibility = View.VISIBLE
-            btnSaveCancelGone()
-        }
-        isImageCaptured = false
-        startCamera()
     }
 
     private fun showError(message: String) {
@@ -339,6 +393,11 @@ class FragmentCamera : Fragment() {
 
     private fun cleanupResources() {
         try {
+            // 0. Cancelar detección automática de hoja
+            leafDetectionJob?.cancel()
+            leafDetectionJob = null
+            isCapturing = false
+
             // 1. Liberar recursos de CameraRepository
             // 2. Liberar recursos de CameraRepository (sin shutdown)
             if (::cameraRepository.isInitialized) {

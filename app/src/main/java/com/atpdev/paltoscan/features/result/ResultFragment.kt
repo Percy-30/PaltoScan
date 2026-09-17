@@ -25,6 +25,7 @@ import com.atpdev.paltoscan.core.ui.FragmentAlertDialogExit
 import com.atpdev.paltoscan.core.utils.sharePaltoScanApp
 import com.atpdev.paltoscan.databinding.FragmentResultBinding
 import com.atpdev.paltoscan.domain.model.RecognitionResult
+import com.atpdev.paltoscan.features.diseaseInfo.DiseaseRepository
 import com.atpdev.paltoscan.features.recognition.RecognitionViewModel
 import com.bumptech.glide.Glide
 import com.squareup.picasso.Picasso
@@ -101,32 +102,53 @@ class ResultFragment : Fragment() {
         // Obtener los datos enviados desde RecognitionFragment
         val recognitionResult = arguments?.getSerializable("recognitionResult") as? RecognitionResult
         recognitionResult?.let { result ->
-            // Ejemplo: Mostrar los datos en la UI
-            binding.tvDiseaseName.text = result.diseaseName
-            // binding.tvConfidence.text = result.getProbabilityString()  // Assuming you have a method to format probability as string
-            // val resultconfidence = result.getProbabilityString().toFloat()
-            // Quitar el símbolo "%" antes de convertir
+            // Mostrar nombre legible y en español de la enfermedad
+            binding.tvDiseaseName.text = DiseaseRepository.getDisplayName(result.diseaseName)
             val resultconfidence = result.getProbabilityString().replace("%", "").toFloat()
 
-            binding.progresoCircular.apply {
-                // progress = resultconfidence
-                progress = if (result.diseaseName == "No detectado") 100f else resultconfidence
-                setProgressWithAnimation(resultconfidence, 1500)
+            val isNotDetected = result.diseaseName == "No detectado" || result.diseaseName == "No reconocido" || result.diseaseName == "No identificado"
+            val isInconclusive = result.diseaseName == "Diagnóstico Incierto" || result.status == com.atpdev.paltoscan.domain.model.RecognitionStatus.INCONCLUSIVE
+            val isLowConfidence = result.isLowConfidence || (resultconfidence < 65f && !isNotDetected)
 
-                // Cambia el color según nivel de acierto
+            binding.progresoCircular.apply {
+                progress = if (isNotDetected) 100f else resultconfidence
+                setProgressWithAnimation(if (isNotDetected) 100f else resultconfidence, 1500)
+
+                // Cambia el color según nivel de acierto y estado
                 progressBarColor =
                     when {
-                        result.diseaseName == "No detectado" -> Color.parseColor("#F44336") // Azul  #03A9F4
-                        resultconfidence >= 80 -> Color.parseColor("#4CAF50") // Verde
+                        isNotDetected -> Color.parseColor("#F44336") // Rojo
+                        isInconclusive -> Color.parseColor("#FF9800") // Naranja (Incierto / Duda)
+                        resultconfidence >= 75 -> Color.parseColor("#4CAF50") // Verde
                         resultconfidence >= 50 -> Color.parseColor("#FFC107") // Amarillo
                         else -> Color.parseColor("#F44336") // Rojo
                     }
             }
-            binding.tvConfidence.text = "${resultconfidence.toInt()}%"
-            // Mostrar el Bitmap en el ImageView
-            // binding.imageViewResult.setImageBitmap(bitmap)
+            binding.tvConfidence.text = if (isNotDetected) "0%" else "${resultconfidence.toInt()}%"
+            binding.btnDiseaseInfo.visibility = if (isNotDetected) View.GONE else View.VISIBLE
 
-            Timber.tag("Performance").d("Probabilidad: ${result.probability}, Resultado del reconocimiento: ${result.diseaseName}")
+            // Mostrar segunda opción si el modelo detectó otra sospecha
+            if (!result.secondDiseaseName.isNullOrBlank() && result.secondProbability > 0.05f) {
+                val secondName = DiseaseRepository.getDisplayName(result.secondDiseaseName)
+                val secondPercent = (result.secondProbability * 100).toInt()
+                binding.tvSecondPrediction.text = "Segunda sospecha: $secondName ($secondPercent%)"
+                binding.tvSecondPrediction.visibility = View.VISIBLE
+            } else {
+                binding.tvSecondPrediction.visibility = View.GONE
+            }
+
+            // Mostrar advertencia si la certeza es baja o inconclusa
+            if (isInconclusive) {
+                binding.tvWarning.text = "⚠️ Baja certeza diagnóstica. Si la hoja presenta daño o manchas, se sugiere repetir la foto con luz natural enfocando el haz (cara superior)."
+                binding.tvWarning.visibility = View.VISIBLE
+            } else if (isLowConfidence) {
+                binding.tvWarning.text = "⚠️ Confianza moderada. Asegúrate de enfocar bien la superficie de la hoja sin sombras."
+                binding.tvWarning.visibility = View.VISIBLE
+            } else {
+                binding.tvWarning.visibility = View.GONE
+            }
+
+            Timber.tag("Performance").d("Probabilidad: ${result.probability}, Resultado: ${result.diseaseName}, 2da: ${result.secondDiseaseName} (${result.secondProbability})")
         }
 
         // Usa los datos
@@ -182,7 +204,7 @@ class ResultFragment : Fragment() {
                 confidenceLevel = confidenceLevel,
             )
         // Usa los datos
-        binding.tvDiseaseName.text = recognitionResult.diseaseName
+        binding.tvDiseaseName.text = DiseaseRepository.getDisplayName(recognitionResult.diseaseName)
         binding.tvConfidence.text = recognitionResult.getProbabilityString()
         bitmap?.let { binding.imageViewResult.setImageBitmap(it) }
     }
@@ -196,6 +218,7 @@ class ResultFragment : Fragment() {
                 val bundle =
                     Bundle().apply {
                         putString("detectedDisease", result.diseaseName)
+                        putString("diseaseName", result.diseaseName)
                         putParcelable("bitmap", bitmap) // Pasar el Bitmap
                     }
                 // Resetear el estado antes de navegar

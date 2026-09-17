@@ -16,7 +16,13 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.inject.Inject
 
-data class ClassificationResult(val label: String, val confidence: Float, val heatmap: Bitmap? = null)
+data class ClassificationResult(
+    val label: String,
+    val confidence: Float,
+    val heatmap: Bitmap? = null,
+    val secondLabel: String? = null,
+    val secondConfidence: Float = 0f,
+)
 
 /**
  * Clase que ayuda a utilizar el modelo de TensorFlow Lite.
@@ -46,8 +52,6 @@ class TensorFlowHelper
             var modelFile: ByteBuffer? = null
             val candidates = listOf(
                 "ml/paltoscan_MobileNetV3Large_Inicial.tflite",
-                "ml/paltoscan_MobileNetV2.tflite",
-                "ml/model_mobilenet.tflite"
             )
             for (candidate in candidates) {
                 try {
@@ -100,9 +104,9 @@ class TensorFlowHelper
             for (y in 0 until inputSize) {
                 for (x in 0 until inputSize) {
                     val pixel = scaledBitmap.getPixel(x, y)
-                    byteBuffer.putFloat(Color.red(pixel) / 255.0f)
-                    byteBuffer.putFloat(Color.green(pixel) / 255.0f)
-                    byteBuffer.putFloat(Color.blue(pixel) / 255.0f)
+                    byteBuffer.putFloat(Color.red(pixel).toFloat())
+                    byteBuffer.putFloat(Color.green(pixel).toFloat())
+                    byteBuffer.putFloat(Color.blue(pixel).toFloat())
                 }
             }
             return byteBuffer
@@ -165,7 +169,9 @@ class TensorFlowHelper
             model.runForMultipleInputsOutputs(inputs, outputs)
             
             val results = predictionBuffer.floatArray
-            val maxIndex = results.indices.maxByOrNull { results[it] } ?: 0
+            val sortedIndices = results.indices.sortedByDescending { results[it] }
+            val maxIndex = sortedIndices.getOrNull(0) ?: 0
+            val secondIndex = sortedIndices.getOrNull(1) ?: -1
             
             var heatmapBitmap: Bitmap? = null
             if (featureMapBuffer != null) {
@@ -175,7 +181,7 @@ class TensorFlowHelper
             }
 
             return if (results[maxIndex] > THRESHOLD) {
-                Pair(false, mapResultToRecognition(results, maxIndex, heatmapBitmap))
+                Pair(false, mapResultToRecognition(results, maxIndex, secondIndex, heatmapBitmap))
             } else {
                 Pair(true, ClassificationResult("No identificado", 0f, heatmapBitmap))
             }
@@ -237,17 +243,20 @@ class TensorFlowHelper
         private fun mapResultToRecognition(
             results: FloatArray,
             classIndex: Int,
+            secondIndex: Int,
             heatmap: Bitmap?
         ): ClassificationResult {
-            return if (classIndex in results.indices) {
-                ClassificationResult(
-                    classNames[classIndex],
-                    results[classIndex],
-                    heatmap
-                )
-            } else {
-                ClassificationResult("No identificado", 0f, heatmap)
-            }
+            val firstLabel = if (classIndex in results.indices) classNames[classIndex] else "No identificado"
+            val firstConfidence = if (classIndex in results.indices) results[classIndex] else 0f
+            val secondLabel = if (secondIndex in results.indices && results[secondIndex] > 0.05f) classNames[secondIndex] else null
+            val secondConfidence = if (secondIndex in results.indices) results[secondIndex] else 0f
+            return ClassificationResult(
+                label = firstLabel,
+                confidence = firstConfidence,
+                heatmap = heatmap,
+                secondLabel = secondLabel,
+                secondConfidence = secondConfidence
+            )
         }
 
         private fun getOutputSize(): Int {
